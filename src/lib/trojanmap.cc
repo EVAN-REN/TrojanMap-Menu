@@ -174,14 +174,15 @@ std::vector<std::string> TrojanMap::Autocomplete(std::string name) {
  */
 std::vector<std::string> TrojanMap::GetAllCategories() {
   std::set<std::string> Categories;
+  std::vector<std::string> res;
   for (auto &node : data)
   {
     for (const std::string &att : node.second.attributes)
       Categories.insert(att);
   }
-  std::vector<std::string> res;
   for (auto &cate : Categories)
     res.push_back(cate);
+  return res;
 }
 
 /**
