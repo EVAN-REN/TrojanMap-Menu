@@ -33,7 +33,7 @@ git_repository(
 
 new_local_repository(
 	name = "opencv",
-	path = "/opt/homebrew/Cellar/opencv/4.8.1_2",
+	path = "/opt/homebrew/Cellar/opencv/4.7.0_2",
 	build_file = "opencv.BUILD",
 )
 
