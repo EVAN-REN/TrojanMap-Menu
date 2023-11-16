@@ -197,6 +197,7 @@ std::vector<std::string> TrojanMap::GetAllLocationsFromCategory(
     std::string category)
 {
   std::vector<std::string> res;
+  if(category.empty())return res;
   for (auto &node : data)
   {
     for (const std::string &att : node.second.attributes)
@@ -208,6 +209,7 @@ std::vector<std::string> TrojanMap::GetAllLocationsFromCategory(
       }
     }
   }
+  if(res.empty())res.push_back("");
 
   return res;
 }
