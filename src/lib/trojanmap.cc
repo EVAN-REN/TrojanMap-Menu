@@ -173,8 +173,15 @@ std::vector<std::string> TrojanMap::Autocomplete(std::string name) {
  * @return {std::vector<std::string>}  : all unique location categories
  */
 std::vector<std::string> TrojanMap::GetAllCategories() {
-
-  return {};
+  std::set<std::string> Categories;
+  for (auto &node : data)
+  {
+    for (const std::string &att : node.second.attributes)
+      Categories.insert(att);
+  }
+  std::vector<std::string> res;
+  for (auto &cate : Categories)
+    res.push_back(cate);
 }
 
 /**
@@ -186,8 +193,21 @@ std::vector<std::string> TrojanMap::GetAllCategories() {
  * @return {std::vector<std::string>}     : ids
  */
 std::vector<std::string> TrojanMap::GetAllLocationsFromCategory(
-    std::string category) {
+    std::string category)
+{
   std::vector<std::string> res;
+  for (auto &node : data)
+  {
+    for (const std::string &att : node.second.attributes)
+    {
+      if (att == category)
+      {
+        res.push_back(node.second.id);
+        break;
+      }
+    }
+  }
+
   return res;
 }
 
@@ -201,7 +221,17 @@ std::vector<std::string> TrojanMap::GetAllLocationsFromCategory(
  * @return {std::vector<std::string>}     : ids
  */
 std::vector<std::string> TrojanMap::GetLocationRegex(std::regex location) {
-  return {};
+  std::vector<std::string> Locations;
+    std::smatch matchResult;
+    for (auto &node : data)
+    {
+      if (std::regex_search(node.second.name, matchResult, location))
+      {
+        Locations.push_back(node.second.id);
+      }
+    }
+    return Locations;
+
 }
 
 /**
