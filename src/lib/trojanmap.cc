@@ -119,6 +119,9 @@ std::string TrojanMap::FindClosestName(std::string name) {
   std::string tmp = ""; // Start with a dummy word
   int minDis = __INT_MAX__;
   for(auto it = data.begin(); it != data.end(); it++){
+    if(it->second.name == ""){
+      continue;
+    }
     int currentDis = CalculateEditDistance(name, it->second.name);
     if(currentDis < minDis){
       minDis = currentDis;
