@@ -493,6 +493,12 @@ bool TrojanMap::CycleDetection(std::vector<std::string> &subgraph, std::vector<d
  */
 std::vector<std::string> TrojanMap::FindNearby(std::string attributesName, std::string name, double r, int k) {
   std::vector<std::string> res;
+  std::vector<std::string> nodesWithAttribute = GetAllLocationsFromCategory(attributesName);
+  for(std::string id:nodesWithAttribute)
+  {
+    if(data[id])
+  }
+
   return res;
 }
 
