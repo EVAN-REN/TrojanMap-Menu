@@ -294,6 +294,7 @@ double TrojanMap::CalculatePathLength(const std::vector<std::string> &path) {
 std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
     std::string location1_name, std::string location2_name) {
   std::vector<std::string> path;
+
   return path;
 }
 
@@ -439,7 +440,8 @@ std::vector<std::string> TrojanMap::DeliveringTrojan(
  * @return {bool}                      : in square or not
  */
 bool TrojanMap::inSquare(std::string id, std::vector<double> &square) {
-  return true;
+  Node curnode = data[id];
+  return (curnode.lon>=square[0] || curnode.lon<=square[1] || curnode.lat<=square[2] || curnode.lat>=square[3]);
 }
 
 
@@ -455,6 +457,13 @@ bool TrojanMap::inSquare(std::string id, std::vector<double> &square) {
 std::vector<std::string> TrojanMap::GetSubgraph(std::vector<double> &square) {
   // include all the nodes in subgraph
   std::vector<std::string> subgraph;
+  for (auto &node : data)
+  {
+    if(inSqure(node.first))
+    {
+      subgraph.push_back(node.first);
+    }
+  }
   return subgraph;
 }
 
