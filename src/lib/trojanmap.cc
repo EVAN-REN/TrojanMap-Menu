@@ -1,4 +1,5 @@
 #include "trojanmap.h"
+#include <queue>
 
 //-----------------------------------------------------
 // TODO: Students should implement the following:
@@ -31,7 +32,6 @@ double TrojanMap::GetLon(const std::string &id)
     return -1;
   else
     return data[id].lon;
-
 }
 
 /**
@@ -62,13 +62,13 @@ std::vector<std::string> TrojanMap::GetNeighborIDs(const std::string &id)
   if (!data.count(id))
     return neighbors;
   else
+  {
+    for (auto n : data[id].neighbors)
     {
-      for(auto n : data[id].neighbors)
-      {
-        neighbors.push_back(n);
-      }
-      return neighbors;
+      neighbors.push_back(n);
     }
+    return neighbors;
+  }
 }
 
 /**
@@ -102,9 +102,10 @@ std::pair<double, double> TrojanMap::GetPosition(std::string name)
 {
   std::pair<double, double> results(-1, -1);
   std::string id = GetID(name);
-  if(id.empty())return results;
-  else return{GetLat(id), GetLon(id)};
-  
+  if (id.empty())
+    return results;
+  else
+    return {GetLat(id), GetLon(id)};
 }
 
 /**
@@ -341,7 +342,17 @@ double TrojanMap::CalculatePathLength(const std::vector<std::string> &path)
   }
   return sum;
 }
+struct CompareDist {
+    const std::unordered_map<std::string, double>& dist;
 
+    // 构造函数，接受 dist 引用
+    CompareDist(const std::unordered_map<std::string, double>& dist) : dist(dist) {}
+
+    // 重载 () 操作符，定义元素比较规则
+    bool operator()(const std::string& a, const std::string& b) const {
+        return dist[a] > dist[b];  // 这里使用 > 符号表示升序排列
+    }
+};
 /**
  * CalculateShortestPath_Dijkstra: Given 2 locations, return the shortest path
  * which is a list of id. Hint: Use priority queue.
@@ -354,19 +365,62 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
     std::string location1_name, std::string location2_name)
 {
   std::vector<std::string> path;
+  std::string sourceNode = GetID(location1_name);
+  std::string destNode = GetID(location2_name);
+  if (sourceNode.empty() || destNode.empty())
+    return path;
+  // check if the names are valid
   std::vector<std::vector<int>> StoredLength(data.size(), std::vector<int>(data.size(), -1));
-  Node sourceNode;
-  Node destNode;
-  std::string id1 = GetID(location1_name);
-  std::string id2 = GetID(location2_name);
-  //check if the names are valid
-  if(id1.empty() || id2.empty())return path;
+  std::unordered_map<std::string, int> visited;
+
+  std::unordered_map<std::string, std::string> prev;
+  std::unordered_map<std::string, double> dist;
+  // 直接提供 CompareDist 对象，而不是调用构造函数
+  std::priority_queue<std::string, std::vector<std::string>, CompareDist> Q(dist);
+
+  for (auto &node : data)
+  { 
+    dist[node.first] = 50000;
+    prev[node.first] = "None";
+    Q.push(node.first);
+  }
+  dist[sourceNode] = 0;
   // find the start and destinaion
-  sourceNode = data[id1];
-  destNode = data[id2];
-  for (auto neighborID : sourceNode.neighbors)
+
+  while (!Q.empty())
   {
-    Node neighbor = data[neighborID];
+    // curNode = vertex in Q with min dist[curNode]
+    Node curNode = data[Q.top()];
+    // remove curNode from Q
+    Q.pop();
+    // if curNode is destination
+    if(curNode.id == destNode)
+    {
+      // push paths inside
+      path.push_back(destNode);
+      std::string node = prev[destNode];
+      while (node != "None")
+      {
+        path.push_back(node);
+        node = prev[node];
+      }
+      std::reverse(path.begin(),path.end());
+      return path;
+      
+    }
+    // for each neighbor v of curNode still in Q:
+    for (auto neighborID : curNode.neighbors)
+    {
+      if (!visited.count(neighborID))
+      {
+        double alt = dist[curNode.id] + CalculateDistance(curNode.id, neighborID);
+        if (alt < dist[neighborID])
+        {
+          dist[neighborID] = alt;
+          prev[neighborID] = curNode.id;
+        }
+      }
+    }
   }
 
   return path;
@@ -524,9 +578,10 @@ std::vector<std::string> TrojanMap::DeliveringTrojan(
  * @param  {std::vector<double>} square: four vertexes of the square area
  * @return {bool}                      : in square or not
  */
-bool TrojanMap::inSquare(std::string id, std::vector<double> &square) {
+bool TrojanMap::inSquare(std::string id, std::vector<double> &square)
+{
   Node curnode = data[id];
-  return (curnode.lon>=square[0] || curnode.lon<=square[1] || curnode.lat<=square[2] || curnode.lat>=square[3]);
+  return (curnode.lon >= square[0] || curnode.lon <= square[1] || curnode.lat <= square[2] || curnode.lat >= square[3]);
 }
 
 /**
@@ -544,7 +599,7 @@ std::vector<std::string> TrojanMap::GetSubgraph(std::vector<double> &square)
   std::vector<std::string> subgraph;
   for (auto &node : data)
   {
-    if(inSqure(node.first))
+    if (inSqure(node.first, square))
     {
       subgraph.push_back(node.first);
     }
@@ -581,9 +636,9 @@ std::vector<std::string> TrojanMap::FindNearby(std::string attributesName, std::
 {
   std::vector<std::string> res;
   std::vector<std::string> nodesWithAttribute = GetAllLocationsFromCategory(attributesName);
-  for(std::string id:nodesWithAttribute)
+  for (std::string id : nodesWithAttribute)
   {
-    if(data[id])
+    if (data[id])
   }
 
   return res;
