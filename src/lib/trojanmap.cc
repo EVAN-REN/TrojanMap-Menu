@@ -524,9 +524,9 @@ std::vector<std::string> TrojanMap::DeliveringTrojan(
  * @param  {std::vector<double>} square: four vertexes of the square area
  * @return {bool}                      : in square or not
  */
-bool TrojanMap::inSquare(std::string id, std::vector<double> &square)
-{
-  return true;
+bool TrojanMap::inSquare(std::string id, std::vector<double> &square) {
+  Node curnode = data[id];
+  return (curnode.lon>=square[0] || curnode.lon<=square[1] || curnode.lat<=square[2] || curnode.lat>=square[3]);
 }
 
 /**
@@ -542,6 +542,13 @@ std::vector<std::string> TrojanMap::GetSubgraph(std::vector<double> &square)
 {
   // include all the nodes in subgraph
   std::vector<std::string> subgraph;
+  for (auto &node : data)
+  {
+    if(inSqure(node.first))
+    {
+      subgraph.push_back(node.first);
+    }
+  }
   return subgraph;
 }
 
@@ -573,6 +580,12 @@ bool TrojanMap::CycleDetection(std::vector<std::string> &subgraph, std::vector<d
 std::vector<std::string> TrojanMap::FindNearby(std::string attributesName, std::string name, double r, int k)
 {
   std::vector<std::string> res;
+  std::vector<std::string> nodesWithAttribute = GetAllLocationsFromCategory(attributesName);
+  for(std::string id:nodesWithAttribute)
+  {
+    if(data[id])
+  }
+
   return res;
 }
 
