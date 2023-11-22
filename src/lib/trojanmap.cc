@@ -347,7 +347,7 @@ struct CompareDist
   std::unordered_map<std::string, double> &dist;
 
   // 构造函数，接受 dist 引用
-  CompareDist(const std::unordered_map<std::string, double> &dist1) : dist(dist1) {}
+  CompareDist(std::unordered_map<std::string, double> &dist1) : dist(dist1) {}
 
   // 重载 () 操作符，定义元素比较规则
   bool operator()(const std::string &a, const std::string &b) const
@@ -840,12 +840,13 @@ std::vector<std::string> TrojanMap::GetSubgraph(std::vector<double> &square)
  * @param {std::vector<double>} square: four vertexes of the square area
  * @return {bool}: whether there is a cycle or not
  */
-bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_map<std::string, bool> allsubgraph, std::string cNodeId, std::vector<double> &square)
+bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_map<std::string, bool> allsubgraph, std::string cNodeId, std::string pNodeId, std::vector<double> &square)
 {
   if (!inSquare(cNodeId, square))
   {
     return false;
   }
+  //find cycle
   if (allsubgraph[cNodeId] == true)
   {
     if (std::find(subgraph.begin(), subgraph.end(), cNodeId) != subgraph.end())
@@ -859,7 +860,10 @@ bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_
   }
   for (std::string neighbor : data[cNodeId].neighbors)
   {
-    if (hasCycle_DFS(subgraph, allsubgraph, neighbor, square))
+    if(neighbor == pNodeId){
+      continue;
+    }
+    if (hasCycle_DFS(subgraph, allsubgraph, neighbor, cNodeId, square))
     {
       return true;
     }
@@ -887,7 +891,7 @@ bool TrojanMap::CycleDetection(std::vector<std::string> &subgraph, std::vector<d
   // search cycle by DFS
   for (auto nodeid : subgraph)
   {
-    if (hasCycle_DFS(subgraph, allsubgraph, nodeid, square))
+    if (hasCycle_DFS(subgraph, allsubgraph, nodeid, "0", square))
     {
       return true;
     }
