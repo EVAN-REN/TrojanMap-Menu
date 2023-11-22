@@ -95,7 +95,9 @@
     "cfloat": "cpp",
     "__verbose_abort": "cpp",
     "variant": "cpp",
-    "climits": "cpp"
+    "climits": "cpp",
+    "cfenv": "cpp",
+    "shared_mutex": "cpp"
   },
   "lldb.displayFormat": "auto",
   "lldb.dereferencePointers": true,

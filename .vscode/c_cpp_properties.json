@@ -6,7 +6,7 @@
         "${workspaceFolder}/src/lib",
         "${workspaceFolder}/src/lib/*",
         "/usr/local/include",
-        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/",
+        //"/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1/",
         "${workspaceFolder}/opencv/install/include/opencv4",
         "${workspaceFolder}"
       ]
