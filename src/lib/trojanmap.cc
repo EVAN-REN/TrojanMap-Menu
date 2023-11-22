@@ -382,7 +382,7 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
 
   for (auto &node : data)
   {
-    dist[node.first] = 50000;
+    dist[node.first] = INT_MAX / 2.0;
     prev[node.first] = "None";
     Q.push(node.first);
   }
@@ -423,7 +423,16 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
       }
     }
   }
-
+  if(prev[destNode]=="None")return path;
+  // push paths inside
+  path.push_back(destNode);
+  std::string node = prev[destNode];
+  while (node != "None")
+  {
+    path.push_back(node);
+    node = prev[node];
+  }
+  std::reverse(path.begin(), path.end());
   return path;
 }
 
@@ -440,6 +449,62 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
     std::string location1_name, std::string location2_name)
 {
   std::vector<std::string> path;
+  std::string sourceID = GetID(location1_name);
+  std::string destID = GetID(location2_name);
+  if (sourceID.empty() || destID.empty())
+    return path;
+
+  std::unordered_map<std::string, double> dist;
+  std::unordered_map<std::string, std::string> prev;
+  bool stop = true;
+
+  for (auto cur : data)
+  {
+    dist[cur.first] = INT_MAX / 2.0;
+    prev[cur.first] = cur.first;
+  }
+  // Initialzie source
+  dist[sourceID] = 0;
+
+  for (int i = 0; i < data.size() - 1; i++)
+  {
+    stop = true;
+    // for each edge
+    for (auto cur : data)
+    {
+      std::string id = cur.first;
+      std::vector<std::string> neighbors = data[id].neighbors;
+      for (std::string neighbor : neighbors)
+      {
+        double dist = CalculateDistance(id, neighbor);
+        if (dist[id] + dist < dist[neighbor])
+        {
+          dist[neighbor] = dist[id] + dist;
+          prev[neighbor] = id;
+          stop = false;
+        }
+      }
+    }
+    // early termination: no relaxation this time
+    if (stop == true)
+    {
+      break;
+    }
+  }
+  // no path to dest
+  if (prev[destID] == destID)
+  {
+    return path;
+  }
+  std::string curID = destID;
+  while (curID != sourceID)
+  {
+    path.push_back(curID);
+    curID = prev[curID];
+  }
+  path.push_back(sourceID);
+  std::reverse(path.begin(), path.end());
+
   return path;
 }
 
