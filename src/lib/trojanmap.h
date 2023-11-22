@@ -151,6 +151,8 @@ class TrojanMap {
   bool CycleDetection(std::vector<std::string> &subgraph,
                       std::vector<double> &square);
 
+  bool hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_map<std::string, bool> allsubgraph, std::string cNodeId, std::vector<double> &square);
+
   // Given a location id and k, find the k closest points on the map
   std::vector<std::string> FindNearby(std::string, std::string, double, int);
   
