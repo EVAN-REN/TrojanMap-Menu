@@ -342,17 +342,11 @@ double TrojanMap::CalculatePathLength(const std::vector<std::string> &path)
   }
   return sum;
 }
-struct CompareDist
-{
-  std::unordered_map<std::string, double> &dist;
+struct cmp{
+  bool operator()(std::pair<double, std::string> &a, 
+                  std::pair<double, std::string> &b){
 
-  // 构造函数，接受 dist 引用
-  CompareDist(const std::unordered_map<std::string, double> &dist1) : dist(dist1) {}
-
-  // 重载 () 操作符，定义元素比较规则
-  bool operator()(const std::string &a, const std::string &b) const
-  {
-    return dist[a] > dist[b]; // 这里使用 > 符号表示升序排列
+      return a.first > b.first; 
   }
 };
 /**
@@ -367,73 +361,70 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
     std::string location1_name, std::string location2_name)
 {
   std::vector<std::string> path;
-  std::string sourceNode = GetID(location1_name);
-  std::string destNode = GetID(location2_name);
-  if (sourceNode.empty() || destNode.empty())
+  // if name uncorrect.
+  std::string sourceID = GetID(location1_name);
+  std::string destID = GetID(location2_name);
+  if (sourceID.size() == 0 || destID.size() == 0){
     return path;
-  // check if the names are valid
-  std::vector<std::vector<int>> StoredLength(data.size(), std::vector<int>(data.size(), -1));
-  std::unordered_map<std::string, int> visited;
-
-  std::unordered_map<std::string, std::string> prev;
+  }
+  // if source = destination
+  if (sourceID == destID){
+    return path;
+  }
+  // if name correct. Initialization.
+  std::unordered_set<std::string> visited;
   std::unordered_map<std::string, double> dist;
-  // 直接提供 CompareDist 对象，而不是调用构造函数
-  std::priority_queue<std::string, std::vector<std::string>, CompareDist> Q(dist);
+  std::unordered_map<std::string, std::string> prev;
+  std::priority_queue<std::pair<double, std::string>,
+                      std::vector<std::pair<double, std::string>>, cmp> Q;  
 
-  for (auto &node : data)
-  {
-    dist[node.first] = INT_MAX / 2.0;
-    prev[node.first] = "None";
-    Q.push(node.first);
+  for (auto cur : data){
+    dist[cur.first] = INT_MAX/2.0;
+    prev[cur.first] = cur.first;
   }
-  dist[sourceNode] = 0;
-  // find the start and destinaion
 
-  while (!Q.empty())
-  {
-    // curNode = vertex in Q with min dist[curNode]
-    Node curNode = data[Q.top()];
-    // remove curNode from Q
+  // Start from source
+  dist[sourceID] = 0;
+  Q.push(std::make_pair(dist[sourceID], sourceID));
+
+  while (!Q.empty()){
+    std::pair<double, std::string> cur = Q.top();
     Q.pop();
-    // if curNode is destination
-    if (curNode.id == destNode)
-    {
-      // push paths inside
-      path.push_back(destNode);
-      std::string node = prev[destNode];
-      while (node != "None")
-      {
-        path.push_back(node);
-        node = prev[node];
-      }
-      std::reverse(path.begin(), path.end());
-      return path;
+    std::string id = cur.second;
+    double distance = cur.first;
+    if (visited.count(id) > 0){
+      continue;
     }
-    // for each neighbor v of curNode still in Q:
-    for (auto neighborID : curNode.neighbors)
-    {
-      if (!visited.count(neighborID))
-      {
-        double alt = dist[curNode.id] + CalculateDistance(curNode.id, neighborID);
-        if (alt < dist[neighborID])
-        {
-          dist[neighborID] = alt;
-          prev[neighborID] = curNode.id;
-        }
+    visited.insert(id);
+    if (data[id].neighbors.empty()){
+      continue;
+    }
+    if (distance > dist[id]){
+      continue;
+    }
+    // for each neighbour
+    std::vector<std::string> neighbors = data[id].neighbors;
+    for (std::string neighborID : neighbors){
+      double alt = dist[id] + CalculateDistance(id, neighborID);
+      if (dist[neighborID] > alt){
+        dist[neighborID] = dist[id] + alt;
+        prev[neighborID] = id;
+        Q.push(std::make_pair(dist[neighborID], neighborID));
       }
     }
   }
-  if (prev[destNode] == "None")
+  
+  if (prev[destID] == destID){
     return path;
-  // push paths inside
-  path.push_back(destNode);
-  std::string node = prev[destNode];
-  while (node != "None")
-  {
-    path.push_back(node);
-    node = prev[node];
   }
+  std::string curID = destID;
+  while (curID != sourceID){
+    path.push_back(curID);
+    curID = prev[curID];
+  }
+  path.push_back(sourceID);
   std::reverse(path.begin(), path.end());
+  
   return path;
 }
 
@@ -750,23 +741,16 @@ std::vector<std::string> TrojanMap::DeliveringTrojan(
     std::vector<std::string> &locations,
     std::vector<std::vector<std::string>> &dependencies)
 {
-  std::vector<std::vector<int>> DAG;
+  std::vector<std::vector<int>> DAG(locations.size(),std::vector<int>(locations.size(),0));
   std::unordered_map<std::string,int> dir;
   std::vector<std::string> result;
   std::vector<int> vis(locations.size(),0);
   int i=0;
-  for(auto &id:locations)dir[id] = i++;
-  for(int i=0;i<locations.size();i++)
-  {
-    for(int j=0;j<locations.size();j++)
-    {
-      DAG[i][j] = 0;
-    }
-  }
+  for(auto &name:locations)dir[GetID(name)] = i++;
   for(int k=0;k<dependencies.size();k++)
   {
-    int id1 = dir[dependencies[k][0]];
-    int id2 = dir[dependencies[k][1]];
+    int id1 = dir[GetID(dependencies[k][0])];
+    int id2 = dir[GetID(dependencies[k][1])];
     DAG[id2][id1] = 1;//means id2 needs id1 
   }
   while(result.size()<locations.size())
