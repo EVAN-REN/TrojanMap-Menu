@@ -423,7 +423,8 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
       }
     }
   }
-  if(prev[destNode]=="None")return path;
+  if (prev[destNode] == "None")
+    return path;
   // push paths inside
   path.push_back(destNode);
   std::string node = prev[destNode];
@@ -476,10 +477,10 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
       std::vector<std::string> neighbors = data[id].neighbors;
       for (std::string neighbor : neighbors)
       {
-        double dist = CalculateDistance(id, neighbor);
-        if (dist[id] + dist < dist[neighbor])
+        double distance = CalculateDistance(id, neighbor);
+        if (dist[id] + distance < dist[neighbor])
         {
-          dist[neighbor] = dist[id] + dist;
+          dist[neighbor] = dist[id] + distance;
           prev[neighbor] = id;
           stop = false;
         }
@@ -521,57 +522,68 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
  *                                                                      and the last vector is the shortest path.
  */
 // Please use brute force to implement this function, ie. find all the permutations.
-double euclideanDistance(double x1, double y1, double x2, double y2) {
-    return static_cast<double>(sqrt((long double)(pow(x2 - x1, 2) + pow(y2 - y1, 2))));
+double euclideanDistance(double x1, double y1, double x2, double y2)
+{
+  return static_cast<double>(sqrt((long double)(pow(x2 - x1, 2) + pow(y2 - y1, 2))));
 }
 
 std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravelingTrojan_Brute_force(
     std::vector<std::string> location_ids)
 {
   std::pair<double, std::vector<std::vector<std::string>>> records;
-  //input is empty or one input
-  if(location_ids.empty()){
+  // input is empty or one input
+  if (location_ids.empty())
+  {
     return records;
   }
 
-  if(location_ids.size() == 1){
+  if (location_ids.size() == 1)
+  {
     records.first = 0.0;
     records.second.push_back({location_ids[0]});
     return records;
   }
-  
+
   std::vector<double> allDistance;
-  //get all permutaion and all paths
-  do {
-      double cDistance;
-      std::vector<std::string> path = location_ids;
-      path.push_back(location_ids[0]);
-      for(int i = 1; i < path.size(); i++){
-        cDistance += euclideanDistance(data[path[i - 1]].lat, data[path[i - 1]].lon, data[path[i]].lat, data[path[i]].lon);
+  // get all permutaion and all paths
+  do
+  {
+    double cDistance;
+    std::vector<std::string> path = location_ids;
+    path.push_back(location_ids[0]);
+    for (int i = 1; i < path.size(); i++)
+    {
+      cDistance += euclideanDistance(data[path[i - 1]].lat, data[path[i - 1]].lon, data[path[i]].lat, data[path[i]].lon);
+    }
+    auto it2 = records.second.begin();
+    for (auto it = allDistance.begin(); it != allDistance.end(); it++)
+    {
+      if (cDistance > *it)
+      {
+        allDistance.insert(it, cDistance);
+        records.second.insert(it2, path);
       }
-      auto it2 = records.second.begin();
-      for(auto it = allDistance.begin(); it != allDistance.end(); it++){
-        if(cDistance > *it){
-          allDistance.insert(it, cDistance);
-          records.second.insert(it2, path);
-        }
-        it2++;
-      }
+      it2++;
+    }
 
   } while (std::next_permutation(location_ids.begin() + 1, location_ids.end()));
   records.first = allDistance.back();
   return records;
 }
 
-void TTBT_DFS(std::vector<std::vector<double>> &pathDis, std::vector<std::string> location_ids, std::pair<double, std::vector<std::vector<std::string>>> &records, std::vector<std::string> &cPath, std::vector<bool> &visited, int cNode, int passNode, std::vector<double> &allDistance, double cDistance){
-  //visited all the nodes
-  if(passNode == location_ids.size()){
+void TTBT_DFS(std::vector<std::vector<double>> &pathDis, std::vector<std::string> location_ids, std::pair<double, std::vector<std::vector<std::string>>> &records, std::vector<std::string> &cPath, std::vector<bool> &visited, int cNode, int passNode, std::vector<double> &allDistance, double cDistance)
+{
+  // visited all the nodes
+  if (passNode == location_ids.size())
+  {
     std::vector<std::string> path = cPath;
     path.push_back(location_ids[0]);
     cDistance += pathDis[cNode][0];
     auto it2 = records.second.begin();
-    for(auto it = allDistance.begin(); it != allDistance.end(); it++){
-      if(cDistance > *it){
+    for (auto it = allDistance.begin(); it != allDistance.end(); it++)
+    {
+      if (cDistance > *it)
+      {
         allDistance.insert(it, cDistance);
         records.second.insert(it2, path);
       }
@@ -581,9 +593,11 @@ void TTBT_DFS(std::vector<std::vector<double>> &pathDis, std::vector<std::string
     return;
   }
 
-  //visit node which isn't visited
-  for(int i = 1; i < location_ids.size(); i++){
-    if(visited[i] == false){
+  // visit node which isn't visited
+  for (int i = 1; i < location_ids.size(); i++)
+  {
+    if (visited[i] == false)
+    {
       cPath.push_back(location_ids[i]);
       visited[i] = true;
       passNode++;
@@ -601,37 +615,41 @@ void TTBT_DFS(std::vector<std::vector<double>> &pathDis, std::vector<std::string
 std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravelingTrojan_Backtracking(
     std::vector<std::string> location_ids)
 {
-  //input is empty
+  // input is empty
   std::pair<double, std::vector<std::vector<std::string>>> records;
-  if(location_ids.empty()){
+  if (location_ids.empty())
+  {
     return records;
   }
 
-  if(location_ids.size() == 1){
+  if (location_ids.size() == 1)
+  {
     records.first = 0.0;
     records.second.push_back({location_ids[0]});
     return records;
   }
 
-  //record all edges
+  // record all edges
   int ids_size = location_ids.size();
-  std::vector<std::vector<double>> pathDis(ids_size , std::vector<double>(ids_size, 0));
-  for(int i = 0; i < ids_size; i++){
-    for(int j = i + 1; j < ids_size; j++){
+  std::vector<std::vector<double>> pathDis(ids_size, std::vector<double>(ids_size, 0));
+  for (int i = 0; i < ids_size; i++)
+  {
+    for (int j = i + 1; j < ids_size; j++)
+    {
       double distance = euclideanDistance(data[location_ids[i]].lat, data[location_ids[i]].lon, data[location_ids[j]].lat, data[location_ids[j]].lon);
       pathDis[i][j] = distance;
       pathDis[j][i] = distance;
     }
   }
 
-  //using backtracking
-  std::vector<bool> visited(ids_size, false); //visited node
-  std::vector<std::string> cPath; //current path
+  // using backtracking
+  std::vector<bool> visited(ids_size, false); // visited node
+  std::vector<std::string> cPath;             // current path
   cPath.push_back(location_ids[0]);
   visited[0] = true;
   std::vector<double> allDistance;
   TTBT_DFS(pathDis, location_ids, records, cPath, visited, 0, 1, allDistance, 0);
-  records.first = allDistance.back(); 
+  records.first = allDistance.back();
   return records;
 }
 
@@ -732,7 +750,48 @@ std::vector<std::string> TrojanMap::DeliveringTrojan(
     std::vector<std::string> &locations,
     std::vector<std::vector<std::string>> &dependencies)
 {
+  std::vector<std::vector<int>> DAG;
+  std::unordered_map<std::string,int> dir;
   std::vector<std::string> result;
+  std::vector<int> vis(locations.size(),0);
+  int i=0;
+  for(auto &id:locations)dir[id] = i++;
+  for(int i=0;i<locations.size();i++)
+  {
+    for(int j=0;j<locations.size();j++)
+    {
+      DAG[i][j] = 0;
+    }
+  }
+  for(int k=0;k<dependencies.size();k++)
+  {
+    int id1 = dir[dependencies[k][0]];
+    int id2 = dir[dependencies[k][1]];
+    DAG[id2][id1] = 1;//means id2 needs id1 
+  }
+  while(result.size()<locations.size())
+  {
+    for(int i=0;i<locations.size();i++)
+    {
+      if(vis[i])continue;
+      int flag=1;
+      for(int j=0;j<locations.size();j++)
+      {
+        if(DAG[i][j]== 1) {flag = 0;break;}
+      }
+      //flag = 1 means this node has no dependencies right now, we can push it into result
+      if(flag)
+      {
+        result.push_back(locations[i]);
+        vis[i] = 1;
+        // use another loop to erase other nodes' dependencies to this node
+        for(int k=0;k<locations.size();k++)
+        {
+          DAG[k][i] = 0;
+        }
+      }
+    }
+  }
   return result;
 }
 
@@ -781,47 +840,60 @@ std::vector<std::string> TrojanMap::GetSubgraph(std::vector<double> &square)
  * @param {std::vector<double>} square: four vertexes of the square area
  * @return {bool}: whether there is a cycle or not
  */
-bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_map<std::string, bool> allsubgraph, std::string cNodeId, std::vector<double> &square){
-  if(!inSquare(cNodeId, square)){
+bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_map<std::string, bool> allsubgraph, std::string cNodeId, std::vector<double> &square)
+{
+  if (!inSquare(cNodeId, square))
+  {
     return false;
   }
-  if(allsubgraph[cNodeId] == true){
-    if(std::find(subgraph.begin(), subgraph.end(), cNodeId) != subgraph.end()){
+  if (allsubgraph[cNodeId] == true)
+  {
+    if (std::find(subgraph.begin(), subgraph.end(), cNodeId) != subgraph.end())
+    {
       return true;
     }
-  }else{
+  }
+  else
+  {
     allsubgraph[cNodeId] = true;
   }
-  for(std::string neighbor : data[cNodeId].neighbors){
-    if(hasCycle_DFS(subgraph, allsubgraph, neighbor, square)){
+  for (std::string neighbor : data[cNodeId].neighbors)
+  {
+    if (hasCycle_DFS(subgraph, allsubgraph, neighbor, square))
+    {
       return true;
     }
   }
   return false;
-
 }
 
 bool TrojanMap::CycleDetection(std::vector<std::string> &subgraph, std::vector<double> &square)
 {
-  if(subgraph.size() <= 1){
+  if (subgraph.size() <= 1)
+  {
     return false;
   }
 
-  //if visited
+  // if visited
   std::unordered_map<std::string, bool> allsubgraph;
-  for(auto node : data){
-    if(inSquare(node.first, square)){
+  for (auto node : data)
+  {
+    if (inSquare(node.first, square))
+    {
       allsubgraph.insert(std::pair<std::string, bool>(node.first, false));
     }
   }
 
-  //search cycle by DFS
-  for(auto nodeid : subgraph){
-    if(hasCycle_DFS(subgraph, allsubgraph, nodeid, square)){
+  // search cycle by DFS
+  for (auto nodeid : subgraph)
+  {
+    if (hasCycle_DFS(subgraph, allsubgraph, nodeid, square))
+    {
       return true;
     }
 
-    for(auto &node : allsubgraph){
+    for (auto &node : allsubgraph)
+    {
       node.second = false;
     }
   }
