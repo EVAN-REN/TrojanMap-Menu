@@ -789,7 +789,7 @@ std::vector<std::string> TrojanMap::DeliveringTrojan(
 bool TrojanMap::inSquare(std::string id, std::vector<double> &square)
 {
   Node curnode = data[id];
-  return (curnode.lon >= square[0] || curnode.lon <= square[1] || curnode.lat <= square[2] || curnode.lat >= square[3]);
+  return (curnode.lon >= square[0] && curnode.lon <= square[1] && curnode.lat <= square[2] && curnode.lat >= square[3]);
 }
 
 /**
@@ -824,12 +824,13 @@ std::vector<std::string> TrojanMap::GetSubgraph(std::vector<double> &square)
  * @param {std::vector<double>} square: four vertexes of the square area
  * @return {bool}: whether there is a cycle or not
  */
-bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_map<std::string, bool> allsubgraph, std::string cNodeId, std::vector<double> &square)
+bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_map<std::string, bool> allsubgraph, std::string cNodeId, std::string pNodeId, std::vector<double> &square)
 {
   if (!inSquare(cNodeId, square))
   {
     return false;
   }
+  //find cycle
   if (allsubgraph[cNodeId] == true)
   {
     if (std::find(subgraph.begin(), subgraph.end(), cNodeId) != subgraph.end())
@@ -837,13 +838,13 @@ bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_
       return true;
     }
   }
-  else
-  {
-    allsubgraph[cNodeId] = true;
-  }
+  allsubgraph[cNodeId] = true;
   for (std::string neighbor : data[cNodeId].neighbors)
   {
-    if (hasCycle_DFS(subgraph, allsubgraph, neighbor, square))
+    if(neighbor == pNodeId){
+      continue;
+    }
+    if (hasCycle_DFS(subgraph, allsubgraph, neighbor, cNodeId, square))
     {
       return true;
     }
@@ -871,7 +872,7 @@ bool TrojanMap::CycleDetection(std::vector<std::string> &subgraph, std::vector<d
   // search cycle by DFS
   for (auto nodeid : subgraph)
   {
-    if (hasCycle_DFS(subgraph, allsubgraph, nodeid, square))
+    if (hasCycle_DFS(subgraph, allsubgraph, nodeid, "0", square))
     {
       return true;
     }
