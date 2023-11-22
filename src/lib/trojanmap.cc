@@ -342,16 +342,18 @@ double TrojanMap::CalculatePathLength(const std::vector<std::string> &path)
   }
   return sum;
 }
-struct CompareDist {
-    const std::unordered_map<std::string, double>& dist;
+struct CompareDist
+{
+  std::unordered_map<std::string, double> &dist;
 
-    // 构造函数，接受 dist 引用
-    CompareDist(const std::unordered_map<std::string, double>& dist) : dist(dist) {}
+  // 构造函数，接受 dist 引用
+  CompareDist(const std::unordered_map<std::string, double> &dist1) : dist(dist1) {}
 
-    // 重载 () 操作符，定义元素比较规则
-    bool operator()(const std::string& a, const std::string& b) const {
-        return dist[a] > dist[b];  // 这里使用 > 符号表示升序排列
-    }
+  // 重载 () 操作符，定义元素比较规则
+  bool operator()(const std::string &a, const std::string &b) const
+  {
+    return dist[a] > dist[b]; // 这里使用 > 符号表示升序排列
+  }
 };
 /**
  * CalculateShortestPath_Dijkstra: Given 2 locations, return the shortest path
@@ -379,7 +381,7 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
   std::priority_queue<std::string, std::vector<std::string>, CompareDist> Q(dist);
 
   for (auto &node : data)
-  { 
+  {
     dist[node.first] = 50000;
     prev[node.first] = "None";
     Q.push(node.first);
@@ -394,7 +396,7 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
     // remove curNode from Q
     Q.pop();
     // if curNode is destination
-    if(curNode.id == destNode)
+    if (curNode.id == destNode)
     {
       // push paths inside
       path.push_back(destNode);
@@ -404,9 +406,8 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
         path.push_back(node);
         node = prev[node];
       }
-      std::reverse(path.begin(),path.end());
+      std::reverse(path.begin(), path.end());
       return path;
-      
     }
     // for each neighbor v of curNode still in Q:
     for (auto neighborID : curNode.neighbors)
@@ -636,9 +637,18 @@ std::vector<std::string> TrojanMap::FindNearby(std::string attributesName, std::
 {
   std::vector<std::string> res;
   std::vector<std::string> nodesWithAttribute = GetAllLocationsFromCategory(attributesName);
+  std::string curNode = GetID(name);
   for (std::string id : nodesWithAttribute)
   {
-    if (data[id])
+    if (id == curNode)
+      continue;
+    if (CalculateDistance(id, curNode) <= r)
+    {
+      res.push_back(id);
+      k--;
+      if (k < 0)
+        break;
+    }
   }
 
   return res;
