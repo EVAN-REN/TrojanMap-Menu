@@ -7,3 +7,5 @@
 /bazel-*
 /opencv
 .DS_Store
+WORKSPACE
+.vscode/settings.json
