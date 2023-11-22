@@ -805,7 +805,7 @@ std::vector<std::string> TrojanMap::DeliveringTrojan(
 bool TrojanMap::inSquare(std::string id, std::vector<double> &square)
 {
   Node curnode = data[id];
-  return (curnode.lon >= square[0] || curnode.lon <= square[1] || curnode.lat <= square[2] || curnode.lat >= square[3]);
+  return (curnode.lon >= square[0] && curnode.lon <= square[1] && curnode.lat <= square[2] && curnode.lat >= square[3]);
 }
 
 /**
@@ -854,10 +854,7 @@ bool TrojanMap::hasCycle_DFS(std::vector<std::string> &subgraph, std::unordered_
       return true;
     }
   }
-  else
-  {
-    allsubgraph[cNodeId] = true;
-  }
+  allsubgraph[cNodeId] = true;
   for (std::string neighbor : data[cNodeId].neighbors)
   {
     if(neighbor == pNodeId){
