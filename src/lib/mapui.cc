@@ -41,6 +41,14 @@ void MapUI::PrintMenu() {
     menu = "Please input a partial location:";
     std::cout << menu;
     getline(std::cin, input);
+    if(input == ""){
+      menu = "Error Input!!!\n";
+      std::cout << menu;
+      menu = "**************************************************************\n";
+      std::cout << menu;
+      PrintMenu();
+      break;
+    }
     auto start = std::chrono::high_resolution_clock::now();
     auto results = map.Autocomplete(input);
     auto stop = std::chrono::high_resolution_clock::now();
@@ -68,6 +76,14 @@ void MapUI::PrintMenu() {
     menu = "Please input a location:";
     std::cout << menu;
     getline(std::cin, input);
+    if(input == ""){
+      menu = "Error Input!!!\n";
+      std::cout << menu;
+      menu = "**************************************************************\n";
+      std::cout << menu;
+      PrintMenu();
+      break;
+    }
     auto start = std::chrono::high_resolution_clock::now();
     auto results = map.GetPosition(input);
     auto stop = std::chrono::high_resolution_clock::now();
