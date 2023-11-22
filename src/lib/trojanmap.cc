@@ -407,7 +407,7 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Dijkstra(
     for (std::string neighborID : neighbors){
       double alt = dist[id] + CalculateDistance(id, neighborID);
       if (dist[neighborID] > alt){
-        dist[neighborID] = dist[id] + alt;
+        dist[neighborID] = alt;
         prev[neighborID] = id;
         Q.push(std::make_pair(dist[neighborID], neighborID));
       }
