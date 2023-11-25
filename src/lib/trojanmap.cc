@@ -535,52 +535,54 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravelingTro
     return records;
   }
 
-  std::vector<double> allDistance;
+  double minDistance = 0;
   // get all permutaion and all paths
   do
   {
-    double cDistance;
-    std::vector<std::string> path = location_ids;
-    path.push_back(location_ids[0]);
-    for (int i = 1; i < path.size(); i++)
+    double cDistance = 0;
+    for (int i = 1; i < location_ids.size(); i++)
     {
-      cDistance += euclideanDistance(data[path[i - 1]].lat, data[path[i - 1]].lon, data[path[i]].lat, data[path[i]].lon);
-    }
-    auto it2 = records.second.begin();
-    for (auto it = allDistance.begin(); it != allDistance.end(); it++)
-    {
-      if (cDistance > *it)
-      {
-        allDistance.insert(it, cDistance);
-        records.second.insert(it2, path);
+      if(cDistance > minDistance && minDistance != 0){
+        break;
       }
-      it2++;
+      cDistance += CalculateDistance(location_ids[i - 1], location_ids[i]);
+    }
+    cDistance += CalculateDistance(location_ids.back(), location_ids[0]);
+    if (minDistance == 0 || cDistance < minDistance)
+    {
+      std::vector<std::string> path = location_ids;
+      path.push_back(location_ids[0]);
+      records.second.clear();
+      records.second.push_back(path);
+      minDistance = cDistance;
+    }else if(cDistance == minDistance){
+      std::vector<std::string> path = location_ids;
+      path.push_back(location_ids[0]);
+      records.second.push_back(path);
     }
 
   } while (std::next_permutation(location_ids.begin() + 1, location_ids.end()));
-  records.first = allDistance.back();
+  records.first = minDistance;
   return records;
 }
 
-void TTBT_DFS(std::vector<std::vector<double>> &pathDis, std::vector<std::string> location_ids, std::pair<double, std::vector<std::vector<std::string>>> &records, std::vector<std::string> &cPath, std::vector<bool> &visited, int cNode, int passNode, std::vector<double> &allDistance, double cDistance)
+void TrojanMap::TTBT_DFS(std::vector<std::string> location_ids, std::pair<double, std::vector<std::vector<std::string>>> &records, std::vector<std::string> &cPath, std::vector<bool> &visited, std::string cNode, int passNodeNumber, double &minDistance, double cDistance)
 {
-  // visited all the nodes
-  if (passNode == location_ids.size())
+  // when all nodes have visited
+  if (passNodeNumber == location_ids.size())
   {
-    std::vector<std::string> path = cPath;
-    path.push_back(location_ids[0]);
-    cDistance += pathDis[cNode][0];
-    auto it2 = records.second.begin();
-    for (auto it = allDistance.begin(); it != allDistance.end(); it++)
-    {
-      if (cDistance > *it)
-      {
-        allDistance.insert(it, cDistance);
-        records.second.insert(it2, path);
-      }
-      it2++;
+    cDistance += CalculateDistance(cNode, location_ids[0]);
+    if(cDistance < minDistance || minDistance == 0){
+      std::vector<std::string> path = cPath;
+      path.push_back(location_ids[0]);
+      records.second.clear();
+      records.second.push_back(path);
+      minDistance = cDistance;
+    }else if(cDistance == minDistance){
+      std::vector<std::string> path = location_ids;
+      path.push_back(location_ids[0]);
+      records.second.push_back(path);
     }
-    records.second.push_back(path);
     return;
   }
 
@@ -589,15 +591,17 @@ void TTBT_DFS(std::vector<std::vector<double>> &pathDis, std::vector<std::string
   {
     if (visited[i] == false)
     {
+      double nDistance = cDistance + CalculateDistance(cNode, location_ids[i]);
+      if(nDistance > minDistance && minDistance != 0){
+        continue;
+      }
       cPath.push_back(location_ids[i]);
       visited[i] = true;
-      passNode++;
-      cDistance += pathDis[cNode][i];
-      TTBT_DFS(pathDis, location_ids, records, cPath, visited, i, passNode, allDistance, cDistance);
+      passNodeNumber++;
+      TTBT_DFS(location_ids, records, cPath, visited, location_ids[i], passNodeNumber, minDistance, nDistance);
       cPath.pop_back();
       visited[i] = false;
-      passNode--;
-      cDistance -= pathDis[cNode][i];
+      passNodeNumber--;
     }
   }
 }
@@ -620,28 +624,35 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravelingTro
     return records;
   }
 
-  // record all edges
-  int ids_size = location_ids.size();
-  std::vector<std::vector<double>> pathDis(ids_size, std::vector<double>(ids_size, 0));
-  for (int i = 0; i < ids_size; i++)
-  {
-    for (int j = i + 1; j < ids_size; j++)
-    {
-      double distance = euclideanDistance(data[location_ids[i]].lat, data[location_ids[i]].lon, data[location_ids[j]].lat, data[location_ids[j]].lon);
-      pathDis[i][j] = distance;
-      pathDis[j][i] = distance;
-    }
-  }
-
   // using backtracking
-  std::vector<bool> visited(ids_size, false); // visited node
-  std::vector<std::string> cPath;             // current path
+  std::vector<bool> visited(location_ids.size(), false); // visited node
+  std::vector<std::string> cPath;             // current passing path
   cPath.push_back(location_ids[0]);
   visited[0] = true;
-  std::vector<double> allDistance;
-  TTBT_DFS(pathDis, location_ids, records, cPath, visited, 0, 1, allDistance, 0);
-  records.first = allDistance.back();
+  double minDistance = 0;
+  TTBT_DFS(location_ids, records, cPath, visited, location_ids[0], 1, minDistance, 0);
+  records.first = minDistance;
   return records;
+}
+
+bool ifHasDistance(const std::vector<std::vector<std::string>> &record, std::vector<std::string> compare){
+  if(record.empty()){
+    return false;
+  }
+
+  for(const std::vector<std::string> ids : record){
+    bool flag = true;
+    for(int i = 0; i < record.size(); i++){
+      if(ids[i] != compare[i]){
+        flag = false;
+        break;
+      }
+    }
+    if(flag){
+      return true;
+    }
+  }
+  return false;
 }
 
 // Hint: https://en.wikipedia.org/wiki/2-opt
@@ -649,6 +660,51 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravelingTro
     std::vector<std::string> location_ids)
 {
   std::pair<double, std::vector<std::vector<std::string>>> records;
+  // input is empty or one input
+  if (location_ids.empty())
+  {
+    return records;
+  }
+
+  if (location_ids.size() == 1)
+  {
+    records.first = 0.0;
+    records.second.push_back({location_ids[0]});
+    return records;
+  }
+
+  location_ids.push_back(location_ids[0]);
+
+  //if have improvement
+  bool improvement = true;
+  while(improvement){
+    improvement = false;
+    for(int i = 1; i < location_ids.size() - 1; i++){
+      for(int j = i + 1; j < location_ids.size() - 1; j++){
+        //compare swap distance
+        double curDistance = CalculateDistance(location_ids[i - 1], location_ids[i]) + CalculateDistance(location_ids[j], location_ids[j + 1]);
+        double newDistance = CalculateDistance(location_ids[i - 1], location_ids[j]) + CalculateDistance(location_ids[i], location_ids[j + 1]);
+        if(newDistance < curDistance){
+          //swap distance
+          std::reverse(location_ids.begin() + i, location_ids.begin() + j + 1);
+          improvement = true;
+          records.second.clear();
+          records.second.push_back(location_ids);
+        }else if(newDistance == curDistance){
+          std::vector<std::string> newlocation = location_ids;
+          std::reverse(newlocation.begin() + i, newlocation.begin() + j + 1);
+          if(!ifHasDistance(records.second, newlocation)){
+            records.second.push_back(newlocation);
+          }
+        }
+      }
+    }
+  }
+  double minDistance;
+  for(int i = 1; i < location_ids.size(); i++){
+    minDistance += CalculateDistance(location_ids[i - 1], location_ids[i]);
+  }
+  records.first = minDistance;
   return records;
 }
 
@@ -905,12 +961,26 @@ std::vector<std::string> TrojanMap::FindNearby(std::string attributesName, std::
   {
     if (id == curNode)
       continue;
-    if (CalculateDistance(id, curNode) <= r)
+    double distance = CalculateDistance(id, curNode);
+    if (distance <= r)
     {
-      res.push_back(id);
-      k--;
-      if (k < 0)
-        break;
+      bool flag = false;
+      for(auto it = res.begin(); it != res.end(); it++){
+        if(distance < CalculateDistance(curNode, *it)){
+          res.insert(it, id);
+          flag = true;
+          break;
+        }
+      }
+      if(!flag){
+        if(res.size() < k){
+          res.push_back(id);
+        }
+      }else{
+        if(res.size() > k){
+          res.pop_back();
+        }
+      } 
     }
   }
 
@@ -924,10 +994,76 @@ std::vector<std::string> TrojanMap::FindNearby(std::string attributesName, std::
  * @param  {std::vector<std::string>} input : a list of locations needs to visit
  * @return {std::vector<std::string> }      : the shortest path
  */
+
 std::vector<std::string> TrojanMap::TrojanPath(
     std::vector<std::string> &location_names)
 {
   std::vector<std::string> res;
+  // input is empty or one input
+  if (location_names.empty())
+  {
+    return res;
+  }
+  if(location_names.size() == 1){
+    for(auto nodes : data){
+      if(nodes.second.name == location_names[0]){
+        res.push_back(nodes.first);
+      }
+      return res;
+    }
+  }
+
+  //reflect name to index
+  std::unordered_map<std::string, int> location_map;
+  for(auto nodes : data){
+    for(int i = 0; i < location_names.size(); i++){
+      if(nodes.second.name == location_names[i]){
+        location_map[location_names[i]] = i;
+        break;
+      }
+    }
+  }
+
+  //calculate shortest path and store path
+  std::vector<std::vector<double>> pathDis(location_names.size(), std::vector<double>(location_names.size(), 0));
+  for(int i = 0; i < location_names.size(); i++){
+    for(int j = i + 1; j < location_names.size(); j++){
+      pathDis[i][j] = CalculatePathLength(CalculateShortestPath_Dijkstra(location_names[i], location_names[j]));
+      pathDis[j][i] = pathDis[i][j];
+    }
+  }
+
+  //brute force to solve tsp
+  std::vector<std::string> pathName;
+  double minDistance = 0;
+  do
+  {
+    double cDistance = 0;
+    for (int i = 1; i < location_names.size(); i++)
+    {
+      if(cDistance > minDistance && minDistance != 0){
+        break;
+      }
+      cDistance += pathDis[location_map[location_names[i - 1]]][location_map[location_names[i]]];
+    }
+    if (minDistance == 0 || cDistance < minDistance)
+    {
+      pathName = location_names;
+      minDistance = cDistance;
+    }
+
+  } while (std::next_permutation(location_names.begin(), location_names.end()));
+
+  // convert name to path id
+  for (int i = 1; i < location_names.size(); i++)
+  {
+    std::vector<std::string> pathId = CalculateShortestPath_Dijkstra(pathName[i - 1], pathName[i]);
+    if(i == 1){
+      res.insert(res.end(), pathId.begin(), pathId.end());
+    }else{
+      res.insert(res.end(), pathId.begin() + 1, pathId.end());
+    }
+  }
   return res;
 }
 
