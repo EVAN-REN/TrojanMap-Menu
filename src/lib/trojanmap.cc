@@ -1073,9 +1073,80 @@ std::vector<std::string> TrojanMap::TrojanPath(
  * @param  {std::vector<std::pair<double, std::vector<std::string>>>} Q : a list of queries
  * @return {std::vector<bool> }      : existence of the path
  */
+class UnionFind{
+  private:
+    std::unordered_map<std::string, std::string> parent;
+    std::unordered_map<std::string, int> rank;
+  public:
+    UnionFind(std::unordered_map<std::string, Node> &data){
+      for(auto it = data.begin(); it != data.end(); it++){
+        parent.insert(std::pair<std::string, std::string>(it->first, it->first));
+        rank.insert(std::pair<std::string, int>(it->first, 0));
+      }
+    }
+
+    //find the root of unit which include str
+    std::string find(std::string str){
+      if(parent[str] != str){
+        parent[str] = find(parent[str]);
+      }
+      return parent[str];
+    }
+
+    //unite two units
+    void unite(std::string s1, std::string s2){
+      std::string ps1 = find(s1);
+      std::string ps2 = find(s2);
+
+      if(ps1 != ps2){
+        if(rank[ps1] < rank[ps2]){
+          parent[ps1] = ps2;
+        }else if(rank[ps1] > rank[ps2]){
+          parent[ps2] = ps1;
+        }else{
+          parent[ps1] = ps2;
+          rank[ps2]++;
+        }
+      }
+    }
+};
+
 std::vector<bool> TrojanMap::Queries(const std::vector<std::pair<double, std::vector<std::string>>> &q)
 {
+  //empty input
   std::vector<bool> ans(q.size());
+  if(q.empty()){
+    return ans;
+  }
+  ans.clear();
+  //iterate all condition
+  for(std::pair<double, std::vector<std::string>> query : q){
+    if(query.second.size() < 2){
+      ans.push_back(false);
+      continue;
+    }
+
+    //create Disjoint-set
+    double maxDistance = query.first;
+    std::vector<std::string> nodeIds;
+    UnionFind uf(data);
+    for(auto it = data.begin(); it != data.end(); it++){
+      for(std::string neighbor : it->second.neighbors){
+        if(CalculateDistance(it->first, neighbor) <= maxDistance){
+          uf.unite(it->first, neighbor);
+        }
+      }
+      if(it->second.name == query.second[0] || it->second.name == query.second[1]){
+        nodeIds.push_back(it->first);
+      }
+    }
+    //didn't find destination
+    if(nodeIds.size() != 2){
+      ans.push_back(false);
+    }else{
+      ans.push_back(uf.find(nodeIds[0]) == uf.find(nodeIds[1]));
+    } 
+  }
   return ans;
 }
 
