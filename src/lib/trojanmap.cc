@@ -286,10 +286,9 @@ std::vector<std::string> TrojanMap::GetAllLocationsFromCategory(
 std::vector<std::string> TrojanMap::GetLocationRegex(std::regex location)
 {
   std::vector<std::string> Locations;
-  std::smatch matchResult;
   for (auto &node : data)
   {
-    if (std::regex_search(node.second.name, matchResult, location))
+    if (std::regex_match(node.second.name, location))
     {
       Locations.push_back(node.second.id);
     }
