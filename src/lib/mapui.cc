@@ -998,7 +998,7 @@ void MapUI::DynamicPrintMenu() {
     y = ui.ScrollLongText(menu);
     auto output = map.GetAllCategories();
     clear();
-    ScrollLongText("Avalible categories:");
+    y=ui.ScrollLongText("Avalible categories:");
     int cnt = 1;
     for (auto x: output) {
       if(!x.empty())
