@@ -213,6 +213,8 @@ TEST(TrojanMapTest, TSP2) {
   std::vector<std::string> gt{"6819019976","1873055993","8566227656","122702233","8566227783","6816180153","7771782316","6820935923","6819019976"}; // Expected order
   std::cout << "GT path length: "  << m.CalculatePathLength(gt) << "miles" << std::endl; // Print the gt path lengths
   bool flag = false;
+  std::cout << m.CalculatePathLength(result.second[0]) << std::endl;
+  std::cout << m.CalculatePathLength(result.second[1]) << std::endl;
   std::cout << result.second.size() << std::endl;
   for(auto i : result.second[0]){
     std::cout << i << std::endl;

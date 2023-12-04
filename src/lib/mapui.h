@@ -10,6 +10,9 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include "src/lib/ui.h"
+
+#define PRINTFIRST(x) y=ui.ScrollLongText(x);
+#define PRINTNEXT(x) y=ui.ScrollLongText(x,10,y);
 #endif
 
 #include <iostream>

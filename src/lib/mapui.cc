@@ -860,7 +860,7 @@ void MapUI::DynamicPrintMenu() {
       "* 5. Get location matching regular expression                 \n"
       "* 6. Cycle Detection                                          \n"
       "* 7. Topological Sort                                         \n"
-      "* 9. Traveling salesman problem                               \n"
+      "* 8. Traveling salesman problem                               \n"
       "* 10. Find Nearby                                             \n"
       "* 11. Find Path to Visit All Places                           \n"
       "* 12. Check Exist of Path with Constrain                      \n"
@@ -920,6 +920,7 @@ void MapUI::DynamicPrintMenu() {
   }
   case 2:
   {
+    //TODO:
     menu =
         "**************************************************************\n"
         "* 2. Find the position                                        \n"
@@ -927,13 +928,14 @@ void MapUI::DynamicPrintMenu() {
     y = ui.ScrollLongText(menu);
     menu = "Please input a location:";
     y = ui.ScrollLongText(menu,10,y);
-    scanw("%s",input);
+    scanw("%[^\n]",input);
     auto start = std::chrono::high_resolution_clock::now();
     auto results = map.GetPosition(input);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************";
+    PRINTNEXT(input);
     y = ui.ScrollLongText(menu);
     if (results.first != -1) {
       y = ui.ScrollLongText("Latitude: " + std::to_string(results.first), 10, y);
@@ -941,6 +943,15 @@ void MapUI::DynamicPrintMenu() {
       PlotPoint(results.first, results.second);
     } else {
       y = ui.ScrollLongText("No matched location.",10,y);
+      std::string tmp = map.FindClosestName(input);
+      PRINTNEXT( "Did you mean " + tmp + " instead of " + input + "? [y/n]");
+      scanw("%[^\n]",input);
+      if (input == "y") {
+        results = map.GetPosition(tmp);
+        y = ui.ScrollLongText("Latitude: " + std::to_string(results.first), 10, y);
+        y = ui.ScrollLongText("Longitude: " + std::to_string(results.second), 10, y);
+        PlotPoint(results.first, results.second);
+      }
     }
     menu = "**************************************************************\n";
     y=ui.ScrollLongText(menu,10,y);
@@ -1173,6 +1184,59 @@ void MapUI::DynamicPrintMenu() {
     } 
     menu = "**************************************************************\n";
     y=ui.ScrollLongText(menu,10,y);
+    y=ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count()/1000) + " ms",10,y);
+    y=ui.ScrollLongText("Press any keys to continue.",10,y);
+    getchar();
+    clear();
+    DynamicPrintMenu();
+    break;
+  }
+  case 8:
+  {
+    menu =
+        "**************************************************************\n"
+        "* 8. Traveling salesman problem                               \n"
+        "**************************************************************\n";
+    y = ui.ScrollLongText(menu);
+    menu = "In this task, we will select N random points on the map and you need to find the path to travel these points and back to the start point.";
+    PRINTNEXT(menu);
+    menu = "Please input the number of the places:";
+    PRINTNEXT(menu);
+    scanw("%s",input);
+    int num = std::stoi(input);
+    std::vector<std::string> keys;
+    for (auto x : map.data) {
+      keys.push_back(x.first);
+    }
+    std::vector<std::string> locations;
+    srand(time(NULL));
+    for (int i = 0; i < num; i++)
+      locations.push_back(keys[rand() % keys.size()]);
+    PlotPoints(locations);
+    for (auto x: locations) PRINTNEXT(x);
+    PRINTNEXT("Calculating ...");
+    auto start = std::chrono::high_resolution_clock::now();
+    auto results = map.TravelingTrojan_Brute_force(locations);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    CreateAnimation(results.second, "output0.avi");
+    clear();
+    menu = "*************************Results******************************\n";
+    PRINTFIRST(menu);
+    menu = "TravelingTrojan_Brute_force\n";
+    PRINTNEXT(menu);
+    if (results.second.size() != 0) {
+      for (auto x : results.second[results.second.size()-1]) PRINTNEXT(x);
+      PRINTNEXT("\nThe distance of the path is:"+ std::to_string(results.first) + " miles");
+      PlotPath(results.second[results.second.size()-1]);
+    } else {
+      PRINTNEXT("The size of the path is 0");
+    }
+    menu = "**************************************************************\n"
+           "You could find your animation at src/lib/output0.avi.          \n";
+    PRINTNEXT(menu);
+    menu = "**************************************************************\n";
+    PRINTNEXT(menu);
     y=ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count()/1000) + " ms",10,y);
     y=ui.ScrollLongText("Press any keys to continue.",10,y);
     getchar();
