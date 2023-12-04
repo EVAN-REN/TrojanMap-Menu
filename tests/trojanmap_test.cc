@@ -213,12 +213,16 @@ TEST(TrojanMapTest, TSP2) {
   std::vector<std::string> gt{"6819019976","1873055993","8566227656","122702233","8566227783","6816180153","7771782316","6820935923","6819019976"}; // Expected order
   std::cout << "GT path length: "  << m.CalculatePathLength(gt) << "miles" << std::endl; // Print the gt path lengths
   bool flag = false;
+  std::cout << result.second.size() << std::endl;
+  for(auto i : result.second[0]){
+    std::cout << i << std::endl;
+  }
   if (!result.second.empty() && gt == result.second.back()) // clockwise
     flag = true;
   std::reverse(gt.begin(),gt.end()); // Reverse the expected order because the counterclockwise result is also correct
   if (!result.second.empty() && gt == result.second.back())
     flag = true;
-  
+  std::cout<<"flag: "<<flag<<std::endl;
   EXPECT_EQ(flag, true);
 }
 

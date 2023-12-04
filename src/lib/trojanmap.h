@@ -132,7 +132,7 @@ class TrojanMap {
   std::pair<double, std::vector<std::vector<std::string>>>
   TravelingTrojan_Backtracking(std::vector<std::string> location_ids);
 
-  void TTBT_DFS(std::vector<std::string> location_ids, std::pair<double, std::vector<std::vector<std::string>>> &records, std::vector<std::string> &cPath, std::vector<bool> &visited, std::string cNode, int passNodeNumber, double &minDistance, double cDistance);
+  void TTBT_DFS(std::vector<std::string> &location_ids, std::pair<double, std::vector<std::vector<std::string>>> &records, std::vector<std::string> &cPath, std::vector<bool> &visited, std::string cNode, int passNodeNumber, double &minDistance, double cDistance);
 
   std::pair<double, std::vector<std::vector<std::string>>> TravelingTrojan_2opt(
       std::vector<std::string> location_ids);

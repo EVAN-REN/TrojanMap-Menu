@@ -565,7 +565,7 @@ std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravelingTro
   return records;
 }
 
-void TrojanMap::TTBT_DFS(std::vector<std::string> location_ids, std::pair<double, std::vector<std::vector<std::string>>> &records, std::vector<std::string> &cPath, std::vector<bool> &visited, std::string cNode, int passNodeNumber, double &minDistance, double cDistance)
+void TrojanMap::TTBT_DFS(std::vector<std::string> &location_ids, std::pair<double, std::vector<std::vector<std::string>>> &records, std::vector<std::string> &cPath, std::vector<bool> &visited, std::string cNode, int passNodeNumber, double &minDistance, double cDistance)
 {
   // when all nodes have visited
   if (passNodeNumber == location_ids.size())

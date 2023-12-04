@@ -859,7 +859,7 @@ void MapUI::DynamicPrintMenu() {
       "* 4. Get all locations of a category                          \n"
       "* 5. Get location matching regular expression                 \n"
       "* 6. Cycle Detection                                          \n"
-      "* 8. Topological Sort                                         \n"
+      "* 7. Topological Sort                                         \n"
       "* 9. Traveling salesman problem                               \n"
       "* 10. Find Nearby                                             \n"
       "* 11. Find Path to Visit All Places                           \n"
@@ -1111,12 +1111,66 @@ void MapUI::DynamicPrintMenu() {
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************\n";
-    y = ui.ScrollLongText(menu,10,y);
+    y = ui.ScrollLongText(menu);
     if (results == true)
       y=ui.ScrollLongText("there exists a cycle in the subgraph ",10,y);
     else
       y=ui.ScrollLongText("there exist no cycle in the subgraph ",10,y);
 
+    menu = "**************************************************************\n";
+    y=ui.ScrollLongText(menu,10,y);
+    y=ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count()/1000) + " ms",10,y);
+    y=ui.ScrollLongText("Press any keys to continue.",10,y);
+    getchar();
+    clear();
+    DynamicPrintMenu();
+    break;
+  }
+  case 7:
+  {
+    menu =
+        "**************************************************************\n"
+        "* 7. Topological Sort                                         \n"
+        "**************************************************************\n";
+    y = ui.ScrollLongText(menu);
+    menu = "Please input the locations filename:";
+    y = ui.ScrollLongText(menu, 10, y);
+    char locations_filename[100];
+    scanw("%s",locations_filename);
+    menu = "Please input the dependencies filename:";
+    y = ui.ScrollLongText(menu, 10, y);
+    char dependencies_filename[100];
+    scanw("%s",dependencies_filename);
+    // Read location names from CSV file
+    std::vector<std::string> location_names;
+    if (locations_filename == "") 
+      location_names = {"Ralphs", "KFC", "Chick-fil-A"};
+    else
+      location_names = map.ReadLocationsFromCSVFile(locations_filename);
+    
+    // Read dependencies from CSV file
+    std::vector<std::vector<std::string>> dependencies;
+    if (dependencies_filename == "")
+      dependencies = {{"Ralphs","Chick-fil-A"}, {"Ralphs","KFC"}, {"Chick-fil-A","KFC"}};
+    else
+      dependencies = map.ReadDependenciesFromCSVFile(dependencies_filename);
+
+    auto start = std::chrono::high_resolution_clock::now();
+    auto result = map.DeliveringTrojan(location_names, dependencies);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    clear();
+    menu =  "*************************Results******************************\n";
+    y = ui.ScrollLongText(menu);
+    if (result.size() > 0) {
+      y = ui.ScrollLongText("Topological Sorting Results:",10,y);
+      for (auto x : result) y = ui.ScrollLongText(x,10,y);
+      std::vector<std::string> node_ids;
+      for (auto x: result) node_ids.push_back(map.GetID(x));
+      PlotPointsOrder(node_ids);
+    } else {
+      y = ui.ScrollLongText("There is no topological sort for the given graph.\n",10,y);
+    } 
     menu = "**************************************************************\n";
     y=ui.ScrollLongText(menu,10,y);
     y=ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count()/1000) + " ms",10,y);
