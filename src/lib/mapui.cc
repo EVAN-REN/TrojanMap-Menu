@@ -850,25 +850,35 @@ void MapUI::DynamicPrintMenu() {
   init_pair(4, COLOR_BLUE, COLOR_BLACK);
 
   std::string menu =
-      "Torjan Map\n"
+      "TrojanMap Menu\n"
       "**************************************************************\n"
-      "* Select the function you want to execute.                    \n"
+      "* Enter the function number (1-11) to start:                  \n"
       "* 1. Autocomplete                                             \n"
-      "* 2. Find the position                                        \n"
+      "* 2. Find the location                                        \n"
       "* 3. CalculateShortestPath                                    \n"
-      "* 4. Exit                                                     \n"
+      "* 4. Get all locations of a category                          \n"
+      "* 5. Get location matching regular expression                 \n"
+      "* 6. Cycle Detection                                          \n"
+      "* 8. Topological Sort                                         \n"
+      "* 9. Traveling salesman problem                               \n"
+      "* 10. Find Nearby                                             \n"
+      "* 11. Find Path to Visit All Places                           \n"
+      "* 12. Check Exist of Path with Constrain                      \n"
+      "* 13. Exit                                                    \n"
       "**************************************************************\n"
-      "Please select 1 - 4: ";
+      "Please input a number to run corresponding function:\n";
   std::string s = menu;
   ui.ScrollLongText(menu);
-  char number = getch();
+  char inp[100];
+  scanw("%s",inp);
+  int number = atoi(inp);
   clear();
   refresh();
   int y=0;
   char input[100];
   switch (number)
   {
-  case '1':
+  case 1:
   {
     menu =
         "**************************************************************\n"
@@ -878,6 +888,15 @@ void MapUI::DynamicPrintMenu() {
     menu = "Please input a partial location:";
     y = ui.ScrollLongText(menu,10,y);
     scanw("%s",input);
+    if(input[0]=='\n')
+    {
+      menu = "Invalid input, please try again.\n";
+      y = ui.ScrollLongText(menu);
+      getchar();
+      clear();
+      DynamicPrintMenu();
+      break;
+    }
     auto start = std::chrono::high_resolution_clock::now();
     auto results = map.Autocomplete(input);
     auto stop = std::chrono::high_resolution_clock::now();
@@ -899,7 +918,7 @@ void MapUI::DynamicPrintMenu() {
     DynamicPrintMenu();
     break;
   }
-  case '2':
+  case 2:
   {
     menu =
         "**************************************************************\n"
@@ -932,7 +951,7 @@ void MapUI::DynamicPrintMenu() {
     DynamicPrintMenu();
     break;
   }
-  case '3':
+  case 3:
   {
     menu =
         "**************************************************************\n"
@@ -970,17 +989,150 @@ void MapUI::DynamicPrintMenu() {
     DynamicPrintMenu();
     break;
   }
-  case '4':
+  case 4:
   {
-    
-    endwin();  // End curses mode
+    menu =
+        "**************************************************************\n"
+        "* 4. Get all locations in a category                           \n"
+        "**************************************************************\n";
+    y = ui.ScrollLongText(menu);
+    auto output = map.GetAllCategories();
+    clear();
+    ScrollLongText("Avalible categories:");
+    int cnt = 1;
+    for (auto x: output) {
+      if(!x.empty())
+      {      
+        std::string cate = std::to_string(cnt) + '.' + x;
+        y = ui.ScrollLongText(cate,10,y);
+        cnt++;
+      }
+    }
+    menu = "Please input category name:";
+    y = ui.ScrollLongText(menu, 10, y);
+    scanw("%s",input);
+    clear();
+    auto start = std::chrono::high_resolution_clock::now();
+    output = map.GetAllLocationsFromCategory(input);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    menu = "*************************Results******************************";
+    y = ui.ScrollLongText(menu);
+    if(output.size()!=0)
+    {
+      for (auto x: output) {
+        std::string name = map.GetName(x);
+        y = ui.ScrollLongText(name,10,y);
+      }
+      PlotPoints(output);
+    }
+    else
+    {
+      y = ui.ScrollLongText("No place founded in that category.", 10, y);
+    }
+    menu = "**************************************************************\n";
+    y=ui.ScrollLongText(menu,10,y);
+    y=ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count()/1000) + " ms",10,y);
+    y=ui.ScrollLongText("Press any keys to continue.",10,y);
+    getchar();
+    clear();
+    DynamicPrintMenu();
     break;
-    // return EXIT_SUCCESS;
+  }
+  case 5:
+  {
+    menu =
+        "**************************************************************\n"
+        "* 5. Get location matching regular expression                 \n"
+        "**************************************************************\n";
+    y = ui.ScrollLongText(menu);
+    menu = "Please input the regular expression:";
+    y = ui.ScrollLongText(menu, 10, y);
+    char input1[100];
+    std::vector<std::string> output;
+    scanw("%s",input1);
+    try {
+        // Try build
+        std::regex regex_pattern(input1);
+        output = map.GetLocationRegex(regex_pattern);
+    } catch (const std::regex_error& e) {
+        // error
+        y=ui.ScrollLongText("Error: input is not a valid regular expression!");
+    }
+    clear();
+    menu = "*************************Results******************************";
+    y = ui.ScrollLongText(menu);
+    if (output.size() != 0) {
+      for (auto x: output) {
+        std::string name = map.GetName(x);
+        y = ui.ScrollLongText(name,10,y);
+      }
+      PlotPoints(output);
+    } else {
+      y = ui.ScrollLongText("No match for the expression provided.", 10, y);
+    }
+    menu = "**************************************************************\n";
+    y=ui.ScrollLongText(menu,10,y);
+    y=ui.ScrollLongText("Press any keys to continue.",10,y);
+    getchar();
+    clear();
+    DynamicPrintMenu();
+    break;
+  }
+  case 6:
+  {
+    menu =
+        "**************************************************************\n"
+        "* 6. Cycle Detection                                          \n"
+        "**************************************************************\n";
+    y = ui.ScrollLongText(menu);
+    y = ui.ScrollLongText("Please input the left bound longitude(between -118.320 and -118.250):",10,y);
+    scanw("%s",input);
+    std::vector<double> square;
+    square.push_back(atof(input));
+
+    y = ui.ScrollLongText("Please input the right bound longitude(between -118.320 and -118.250):",10,y);
+    scanw("%s",input);
+    square.push_back(atof(input));
+
+    y = ui.ScrollLongText("Please input the upper bound latitude(between 34.000 and 34.040):",10,y);
+    scanw("%s",input);
+    square.push_back(atof(input));
+
+    y = ui.ScrollLongText("Please input the lower bound latitude(between 34.000 and 34.040):",10,y);
+    scanw("%s",input);
+    square.push_back(atof(input));
+    auto subgraph = map.GetSubgraph(square);
+    PlotPointsandEdges(subgraph, square);
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    auto results = map.CycleDetection(subgraph, square);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    clear();
+    menu = "*************************Results******************************\n";
+    y = ui.ScrollLongText(menu,10,y);
+    if (results == true)
+      y=ui.ScrollLongText("there exists a cycle in the subgraph ",10,y);
+    else
+      y=ui.ScrollLongText("there exist no cycle in the subgraph ",10,y);
+
+    menu = "**************************************************************\n";
+    y=ui.ScrollLongText(menu,10,y);
+    y=ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count()/1000) + " ms",10,y);
+    y=ui.ScrollLongText("Press any keys to continue.",10,y);
+    getchar();
+    clear();
+    DynamicPrintMenu();
+    break;
   }
   default:
   {
-    DynamicPrintMenu();
-    break;
+      endwin();  // End curses mode
+      break;
+      // return EXIT_SUCCESS;
+      DynamicPrintMenu();
+      break;
   }
   }
 }

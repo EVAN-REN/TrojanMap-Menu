@@ -3,7 +3,7 @@
 #define DOT_SIZE 5
 #define LINE_WIDTH 3
 
-// #define NCURSES
+#define NCURSES
 #ifdef NCURSES
 #include <sstream>
 #include <fstream>
