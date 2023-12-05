@@ -942,7 +942,7 @@ void MapUI::DynamicPrintMenu()
   init_pair(3, COLOR_YELLOW, COLOR_BLACK);
   init_pair(4, COLOR_BLUE, COLOR_BLACK);
 
-  std::string menu =
+   std::string menu =
       "TrojanMap Menu\n"
       "**************************************************************\n"
       "* Enter the function number (1-11) to start:                  \n"
@@ -1004,7 +1004,7 @@ void MapUI::DynamicPrintMenu()
     }
     else
     {
-      ui.ScrollLongText("No matched locations./n", 10, y);
+      ui.ScrollLongText("No matched locations.", 10, y);
     }
     menu = "**************************************************************\n";
     y = ui.ScrollLongText(menu, 10, y);
@@ -1031,7 +1031,6 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************";
-    PRINTNEXT(input);
     y = ui.ScrollLongText(menu);
     if (results.first != -1)
     {
@@ -1045,7 +1044,7 @@ void MapUI::DynamicPrintMenu()
       std::string tmp = map.FindClosestName(input);
       PRINTNEXT("Did you mean " + tmp + " instead of " + input + "? [y/n]");
       scanw("%[^\n]", input);
-      if (input == "y")
+      if (input[0] == 'y')
       {
         results = map.GetPosition(tmp);
         y = ui.ScrollLongText("Latitude: " + std::to_string(results.first), 10, y);
@@ -1088,7 +1087,7 @@ void MapUI::DynamicPrintMenu()
     {
       // for (auto x : results) y = ui.ScrollLongText(x, 10, y);
       y = ui.ScrollLongText("The distance of the path is:" + std::to_string(map.CalculatePathLength(results)) + " miles", 10, y);
-      PlotPath(results);
+      PlotPathwithName(results);
     }
     else
     {
@@ -1140,7 +1139,7 @@ void MapUI::DynamicPrintMenu()
         std::string name = map.GetName(x);
         y = ui.ScrollLongText(name, 10, y);
       }
-      PlotPoints(output);
+      PlotPathwithName(output);
     }
     else
     {
@@ -1176,11 +1175,11 @@ void MapUI::DynamicPrintMenu()
     catch (const std::regex_error &e)
     {
       // error
-      y = ui.ScrollLongText("Error: input is not a valid regular expression!");
+      PRINTNEXT("Error: input is not a valid regular expression!");
     }
     clear();
     menu = "*************************Results******************************";
-    y = ui.ScrollLongText(menu);
+    PRINTFIRST(menu);
     if (output.size() != 0)
     {
       for (auto x : output)
@@ -1188,7 +1187,7 @@ void MapUI::DynamicPrintMenu()
         std::string name = map.GetName(x);
         y = ui.ScrollLongText(name, 10, y);
       }
-      PlotPoints(output);
+      PlotPathwithName(output);
     }
     else
     {
@@ -1256,27 +1255,43 @@ void MapUI::DynamicPrintMenu()
         "* 7. Topological Sort                                         \n"
         "**************************************************************\n";
     y = ui.ScrollLongText(menu);
-    menu = "Please input the locations filename:";
-    y = ui.ScrollLongText(menu, 10, y);
-    char locations_filename[100];
-    scanw("%s", locations_filename);
-    menu = "Please input the dependencies filename:";
-    y = ui.ScrollLongText(menu, 10, y);
-    char dependencies_filename[100];
-    scanw("%s", dependencies_filename);
-    // Read location names from CSV file
+    menu = "Read locations from input folder? [y/n]";
+    PRINTNEXT(menu);
+    scanw("%[^\n]",input);
     std::vector<std::string> location_names;
-    if (locations_filename == "")
-      location_names = {"Ralphs", "KFC", "Chick-fil-A"};
-    else
-      location_names = map.ReadLocationsFromCSVFile(locations_filename);
-
-    // Read dependencies from CSV file
     std::vector<std::vector<std::string>> dependencies;
-    if (dependencies_filename == "")
-      dependencies = {{"Ralphs", "Chick-fil-A"}, {"Ralphs", "KFC"}, {"Chick-fil-A", "KFC"}};
+    if(input[0] == 'y')
+    {
+      location_names = map.ReadLocationsFromCSVFile("input/topologicalsort_locations.csv");
+      dependencies = map.ReadDependenciesFromCSVFile("input/topologicalsort_dependencies.csv");
+    }
     else
-      dependencies = map.ReadDependenciesFromCSVFile(dependencies_filename);
+    {
+      menu = "Please input the locations filename:";
+      y = ui.ScrollLongText(menu, 10, y);
+      char locations_filename[100] = "None";
+      scanw("%[^\n]", locations_filename);
+      PRINTNEXT(locations_filename);
+      if (locations_filename[0]=='N')
+      {
+        PRINTNEXT("Default input: Ralphs, KFC, Chick-fil-A");
+        location_names = {"Ralphs", "KFC", "Chick-fil-A"};
+      }
+      else
+        location_names = map.ReadLocationsFromCSVFile(locations_filename);
+      menu = "Please input the dependencies filename:";
+      y = ui.ScrollLongText(menu, 10, y);
+      char dependencies_filename[100] = "None";
+      scanw("%s", dependencies_filename);
+      if (dependencies_filename[0] == 'N')
+      {
+        PRINTNEXT("Default input: {\"Ralphs\", \"Chick-fil-A\"}, {\"Ralphs\", \"KFC\"}, {\"Chick-fil-A\", \"KFC\"}");
+        dependencies = {{"Ralphs", "Chick-fil-A"}, {"Ralphs", "KFC"}, {"Chick-fil-A", "KFC"}};
+      }
+      else
+        dependencies = map.ReadDependenciesFromCSVFile(dependencies_filename);
+
+    }
 
     auto start = std::chrono::high_resolution_clock::now();
     auto result = map.DeliveringTrojan(location_names, dependencies);
@@ -1349,7 +1364,7 @@ void MapUI::DynamicPrintMenu()
       for (auto x : results.second[results.second.size() - 1])
         PRINTNEXT(x);
       PRINTNEXT("\nThe distance of the path is:" + std::to_string(results.first) + " miles");
-      PlotPath(results.second[results.second.size() - 1]);
+      PlotPointsOrder(results.second[results.second.size() - 1]);
     }
     else
     {
@@ -1376,12 +1391,12 @@ void MapUI::DynamicPrintMenu()
     PRINTFIRST(menu);
     menu = "Please input the attribute:";
     PRINTNEXT(menu);
-    std::string attribute;
+    char attribute[100];
     scanw("%[^\n]", attribute);
 
     menu = "Please input the locations:";
     PRINTNEXT(menu);
-    std::string origin;
+    char origin[100];
     scanw("%[^\n]", origin);
 
     menu = "Please input radius r:";
@@ -1409,6 +1424,9 @@ void MapUI::DynamicPrintMenu()
       cnt++;
     }
     PlotPointsLabel(result, map.GetID(origin));
+    std::vector<std::string> originLocation;;
+    originLocation.push_back(map.GetID(origin));
+
     menu = "**************************************************************\n";
     PRINTNEXT(menu);
     y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
@@ -1426,13 +1444,13 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n";
     PRINTFIRST(menu);
     PRINTNEXT("Please input the locations filename:");
-    std::string locations_filename;
+    char locations_filename[100] = "None";
     scanw("%[^\n]", locations_filename);
 
-    // Read location names from CSV file
+    // Read location names from CSV file        
     std::vector<std::string> location_names;
-    if (locations_filename == "")
-      location_names = {"Ralphs", "KFC", "Chick-fil-A"};
+    if (locations_filename[0] == 'N')
+      location_names = {"Ralphs", "KFC", "Chick-fil-A", "Target", "Lee's Market", "Dornsife Spatial Sciences Institute"};
     else
       location_names = map.ReadLocationsFromCSVFile(locations_filename);
 
@@ -1475,23 +1493,23 @@ void MapUI::DynamicPrintMenu()
     {
       menu = "Please input the start location:";
       PRINTNEXT(menu);
-      std::string input1;
+      char input1[100];
       scanw("%[^\n]", input1);
       menu = "Please input the destination:";
       PRINTNEXT(menu);
-      std::string input2;
+      char input2[100];
       scanw("%[^\n]", input2);
       menu = "Please input the volumn of the gas tank:";
       PRINTNEXT(menu);
-      std::string input3;
+      char input3[100];
       scanw("%[^\n]", input3);
       double volumn = std::stod(input3);
       Q.push_back({volumn, {input1, input2}});
       menu = "More Query? (y/n)";
       PRINTNEXT(menu);
-      std::string input4;
+      char input4[100];
       scanw("%[^\n]", input4);
-      if (input4 != "y")
+      if (input4[0] != 'y')
         break;
     }
     auto start = std::chrono::high_resolution_clock::now();
