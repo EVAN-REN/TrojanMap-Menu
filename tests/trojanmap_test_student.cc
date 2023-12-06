@@ -97,10 +97,10 @@ TEST(TrojanMapTest, TSP_2opt_3nodes) {
   
   std::vector<std::string> input{"8566227783","8566227656","6816180153"};
   auto start = std::chrono::high_resolution_clock::now();
-  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_Backtracking(input).second;
+  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_2opt(input).second;
   auto end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-  std::vector<std::vector<std::string>> expected{{"8566227783", "8566227656", "6816180153", "8566227783"}};
+  std::vector<std::vector<std::string>> expected{{ "8566227783", "6816180153", "8566227656", "8566227783" }};
   std::cout << "By 2opt, 3 nodes run time: " << duration.count() << "ms" << std::endl;
 
   EXPECT_EQ(actual, expected);
@@ -140,10 +140,10 @@ TEST(TrojanMapTest, TSP_2opt_4nodes) {
   
   std::vector<std::string> input{"6820935923","122702233","8566227656","6816180153"};
   auto start = std::chrono::high_resolution_clock::now();
-  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_Backtracking(input).second;
+  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_2opt(input).second;
   auto end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-  std::vector<std::vector<std::string>> expected{{"6820935923", "6816180153", "122702233", "8566227656", "6820935923"}};
+  std::vector<std::vector<std::string>> expected{{"6820935923", "8566227656", "122702233", "6816180153", "6820935923"}};
   std::cout << "By 2opt, 4 nodes run time: " << duration.count() << "ms" << std::endl;
 
   EXPECT_EQ(actual, expected);
@@ -182,11 +182,96 @@ TEST(TrojanMapTest, TSP_2opt_5nodes) {
   
   std::vector<std::string> input{"6820935923","1873055993","7771782316","8566227656","6816180153"};
   auto start = std::chrono::high_resolution_clock::now();
+  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_2opt(input).second;
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  std::vector<std::vector<std::string>> expected{{"6820935923", "7771782316", "6816180153", "8566227656", "1873055993", "6820935923"}};
+  std::cout << "By 2opt, 5 nodes run time: " << duration.count() << "ms" << std::endl;
+
+  EXPECT_EQ(actual, expected);
+}
+
+
+TEST(TrojanMapTest, TSP_Brute_force_6nodes) {
+  TrojanMap m;
+  
+  std::vector<std::string> input{"6819019976", "122702233", "8566227783", "6816180153", "4009734472", "5917800482"};
+  auto start = std::chrono::high_resolution_clock::now();
+  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_Brute_force(input).second;
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  std::vector<std::vector<std::string>> expected{{"6819019976", "5917800482", "4009734472", "6816180153", "8566227783", "122702233", "6819019976"}};
+  std::cout << "By Brute force, 6 nodes run time: " << duration.count() << "ms" << std::endl;
+  
+  EXPECT_EQ(actual, expected);
+}
+
+TEST(TrojanMapTest, TSP_Backtracking_6nodes) {
+  TrojanMap m;
+  
+  std::vector<std::string> input{"6819019976", "122702233", "8566227783", "6816180153", "4009734472", "5917800482"};
+  auto start = std::chrono::high_resolution_clock::now();
   std::vector<std::vector<std::string>> actual = m.TravelingTrojan_Backtracking(input).second;
   auto end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-  std::vector<std::vector<std::string>> expected{{"6820935923", "1873055993", "8566227656", "6816180153", "7771782316", "6820935923"}};
-  std::cout << "By 2opt, 5 nodes run time: " << duration.count() << "ms" << std::endl;
+  std::vector<std::vector<std::string>> expected{{"6819019976", "5917800482", "4009734472", "6816180153", "8566227783", "122702233", "6819019976"}};
+  std::cout << "By Backtracking, 6 nodes run time: " << duration.count() << "ms" << std::endl;
+  
+  EXPECT_EQ(actual, expected);
+}
+
+TEST(TrojanMapTest, TSP_2opt_6nodes) {
+  TrojanMap m;
+  
+  std::vector<std::string> input{"6819019976", "122702233", "8566227783", "6816180153", "4009734472", "5917800482"};
+  auto start = std::chrono::high_resolution_clock::now();
+  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_2opt(input).second;
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  std::vector<std::vector<std::string>> expected{{"6819019976", "5917800482", "4009734472", "6816180153", "8566227783", "122702233", "6819019976"}};
+  std::cout << "By 2opt, 6 nodes run time: " << duration.count() << "ms" << std::endl;
+
+  EXPECT_EQ(actual, expected);
+}
+
+TEST(TrojanMapTest, TSP_Brute_force_7nodes) {
+  TrojanMap m;
+  
+  std::vector<std::string> input{"6819019976", "6813379578", "7360410808", "8566227656", "5567738306", "5172201326", "8566227783"};
+  auto start = std::chrono::high_resolution_clock::now();
+  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_Brute_force(input).second;
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  std::vector<std::vector<std::string>> expected{{"6819019976", "8566227656", "5567738306", "8566227783", "6813379578", "7360410808", "5172201326", "6819019976"}};
+  std::cout << "By Brute force, 7 nodes run time: " << duration.count() << "ms" << std::endl;
+  
+  EXPECT_EQ(actual, expected);
+}
+
+TEST(TrojanMapTest, TSP_Backtracking_7nodes) {
+  TrojanMap m;
+  
+  std::vector<std::string> input{"6819019976", "6813379578", "7360410808", "8566227656", "5567738306", "5172201326", "8566227783"};
+  auto start = std::chrono::high_resolution_clock::now();
+  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_Backtracking(input).second;
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  std::vector<std::string> expected{"6819019976", "8566227656", "5567738306", "8566227783", "6813379578", "7360410808", "5172201326", "6819019976"};
+  std::cout << "By Backtracking, 7 nodes run time: " << duration.count() << "ms" << std::endl;
+  
+  EXPECT_EQ(actual[0], expected);
+}
+
+TEST(TrojanMapTest, TSP_2opt_7nodes) {
+  TrojanMap m;
+  
+  std::vector<std::string> input{"6819019976", "6813379578", "7360410808", "8566227656", "5567738306", "5172201326", "8566227783"};
+  auto start = std::chrono::high_resolution_clock::now();
+  std::vector<std::vector<std::string>> actual = m.TravelingTrojan_2opt(input).second;
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+  std::vector<std::vector<std::string>> expected{{"6819019976", "5172201326", "7360410808", "6813379578", "8566227783", "5567738306", "8566227656", "6819019976"}};
+  std::cout << "By 2opt, 7 nodes run time: " << duration.count() << "ms" << std::endl;
 
   EXPECT_EQ(actual, expected);
 }

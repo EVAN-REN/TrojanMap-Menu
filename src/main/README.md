@@ -49,15 +49,31 @@ Description: Iterate all the data, and put them in different units by tank_capac
 Time complexity: O(m(n + V + E))
 
 TSP:
-| Number of nodes | Time with Brute_force | Time with Backtracking|Time with Backtracking 2opt|
-|  3              |                     |                      |                           |
-|  4              |                     |                      |                           |
-|  5              |                     |                      |                           |
-|  6              |                     |                      |                           |
-|  7              |                     |                      |                           |
-|  8              |                     |                      |                           |
-|  9              |                     |                      |                           |
-|  10             |                     |                      |                           |
+| Number of nodes | Time with Brute_force | Time with Backtracking|Time with  2opt|
+|  3              |           19ms        |          25ms         |            12ms           |
+|  4              |           29ms        |          34ms         |            38ms           |
+|  5              |           133ms       |          109ms        |            66ms           |
+|  6              |           751ms       |          525ms        |            58ms           |
+|  7              |           3632ms      |          2384ms       |            255ms          |
+
+
+
+
+
+ShortestPath:
+|Source | Destination | Distance(mile) | Dijkstra Cost(ms) | Bellman_Ford Cost(ms) |
+|Chase  | Ralphs      | 1.256014       | 173               | 8232                  |
+|Ralphs | Target      | 0.927969       | 174               | 8861                  |
+|Popeyes| KFC         | 0.258119       | 174               | 8552                  |
+
+
+
+
+
+
+
+
+
 
 
 
