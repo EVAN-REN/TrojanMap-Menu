@@ -57,9 +57,6 @@ TSP:
 |  7              |           3632ms      |          2384ms       |            255ms          |
 
 
-
-
-
 ShortestPath:
 |Source | Destination | Distance(mile) | Dijkstra Cost(ms) | Bellman_Ford Cost(ms) |
 |Chase  | Ralphs      | 1.256014       | 173               | 8232                  |
@@ -67,70 +64,4 @@ ShortestPath:
 |Popeyes| KFC         | 0.258119       | 174               | 8552                  |
 
 
-
-
-
-
-
-
-
-
-
-
-1.
-ta
-chi
-Expo
-
-2.
-chipote
-Venicehill
-leavylibrary
-
-3.
-Chase - Ralphs
-Ralphs - Target
-Popeyes - KFC
-
-4.
-fast_food
-bank
-place_of_worship
-
-5
-.*Library.*
-Chinese.*
-\w{6}
-
-6
--118.290, -118.289, 34.030, 34.020
-
-7
-restaurant
-Target
-10
-10
-
-school
-KFC
-10
-10
-
-fast_food
-Shell
-1
-10
-
-8
-Target
-Ralphs
-0.05
-Ralphs
-Target
-0.01
-KFC
-Target
-0.02
-dummy
-dummy
-999
+youtube video: https://youtu.be/mKMLpjKca1I
