@@ -141,7 +141,6 @@ class TrojanMap {
       std::vector<std::string> location_ids);
 
   std::vector<std::string> TrojanPath(std::vector<std::string> &location_names);
-  void primMST(std::vector<std::string> &location_names,  std::vector<int> &parents);
     
   // Check whether the id is in square or not
   bool inSquare(std::string id, std::vector<double> &square);

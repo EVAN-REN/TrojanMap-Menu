@@ -101,6 +101,9 @@ std::string TrojanMap::GetID(const std::string &name)
 std::pair<double, double> TrojanMap::GetPosition(std::string name)
 {
   std::pair<double, double> results(-1, -1);
+  if(name.empty()){
+    return results;
+  }
   std::string id = GetID(name);
   if (id.empty())
     return results;
@@ -201,6 +204,9 @@ bool caseInsensitiveStringCompare(std::string s1, std::string s2)
 std::vector<std::string> TrojanMap::Autocomplete(std::string name)
 {
   std::vector<std::string> results;
+  if(name.empty()){
+    return results;
+  }
   int size = name.size();
   for (auto it = data.begin(); it != data.end(); it++)
   {
@@ -512,11 +518,6 @@ std::vector<std::string> TrojanMap::CalculateShortestPath_Bellman_Ford(
  *                                                                      and the last vector is the shortest path.
  */
 // Please use brute force to implement this function, ie. find all the permutations.
-double euclideanDistance(double x1, double y1, double x2, double y2)
-{
-  return static_cast<double>(sqrt((long double)(pow(x2 - x1, 2) + pow(y2 - y1, 2))));
-}
-
 std::pair<double, std::vector<std::vector<std::string>>> TrojanMap::TravelingTrojan_Brute_force(
     std::vector<std::string> location_ids)
 {
