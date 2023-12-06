@@ -579,7 +579,7 @@ void TrojanMap::TTBT_DFS(std::vector<std::string> &location_ids, std::pair<doubl
       records.second.push_back(path);
       minDistance = cDistance;
     }else if(cDistance == minDistance){
-      std::vector<std::string> path = location_ids;
+      std::vector<std::string> path = cPath;
       path.push_back(location_ids[0]);
       records.second.push_back(path);
     }

@@ -49,6 +49,12 @@ Description: Iterate all the data, and put them in different units by tank_capac
 Time complexity: O(m(n + V + E))
 
 TSP:
-| Number of nodes      | Time with Brute_force | Time with Backtracking|Time with Backtracking 2opt|
-| -------------------- |  |   |    |
-|             |  t1        | t2    |    |
+| Number of nodes | Time with Brute_force | Time with Backtracking|Time with Backtracking 2opt|
+|  3              |                     |                      |                           |
+|  4              |                     |                      |                           |
+|  5              |                     |                      |                           |
+|  6              |                     |                      |                           |
+|  7              |                     |                      |                           |
+|  8              |                     |                      |                           |
+|  9              |                     |                      |                           |
+|  10             |                     |                      |                           |
