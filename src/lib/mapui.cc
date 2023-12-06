@@ -1293,8 +1293,8 @@ void MapUI::DynamicPrintMenu()
     std::vector<std::vector<std::string>> dependencies;
     if (input[0] == 'y')
     {
-      location_names = map.ReadLocationsFromCSVFile("input/topologicalsort_locations.csv");
-      dependencies = map.ReadDependenciesFromCSVFile("input/topologicalsort_dependencies.csv");
+      location_names = map.ReadLocationsFromCSVFile("src/input/topologicalsort_locations.csv");
+      dependencies = map.ReadDependenciesFromCSVFile("src/input/topologicalsort_dependencies.csv");
     }
     else
     {
@@ -1432,7 +1432,7 @@ void MapUI::DynamicPrintMenu()
     menu = "Please input radius r:";
     PRINT_MESSAGE(menu);
     scanw("%[^\n]", input);
-    int r = std::stoi(input);
+    double r = std::stod(input);
 
     menu = "Please input number k:(number of maximum locations)";
     PRINT_MESSAGE(menu);

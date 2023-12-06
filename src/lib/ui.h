@@ -176,7 +176,7 @@ public:
 
   int ScrollLongResultText(std::string s, int intervalMilliSeconds = 10, int y = 0)
   {
-    init_pair(4, COLOR_BLUE, COLOR_BLACK);
+    init_pair(4, COLOR_BLUE, COLOR_WHITE);
     std::string delimiter = "\n";
     size_t pos = 0;
     std::string token;
