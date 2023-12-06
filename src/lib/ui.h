@@ -100,7 +100,7 @@ public:
 
   int ScrollLongMessageText(std::string s, int intervalMilliSeconds = 10, int y = 0)
   {
-    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(3, COLOR_WHITE, COLOR_BLACK);
     std::string delimiter = "\n";
     size_t pos = 0;
     std::string token;
@@ -119,7 +119,7 @@ public:
 
   int ScrollLongWarningText(std::string s, int intervalMilliSeconds = 10, int y = 0)
   {
-    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(5, COLOR_YELLOW, COLOR_BLACK);
     std::string delimiter = "\n";
     size_t pos = 0;
     std::string token;

@@ -1103,7 +1103,7 @@ void MapUI::DynamicPrintMenu()
     char input2[100];
     scanw("%s", input2);
     auto start = std::chrono::high_resolution_clock::now();
-    auto results = map.CalculateShortestPath_Dijkstra(input1, input2);
+    std::vector<std::string> results = map.CalculateShortestPath_Dijkstra(input1, input2);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
@@ -1483,7 +1483,7 @@ void MapUI::DynamicPrintMenu()
     if (locations_filename[0] == 'N')
     {
       PRINT_WARNING("Using default input: \"Ralphs\", \"KFC\", \"Dornsife Spatial Sciences Institute\"");
-      location_names = {"Ralphs", "KFC", "Dornsife Spatial Sciences Institute", "Smoke Shop", "Target"};
+      location_names = {"Leavey Library", "Popeyes", "Dornsife Spatial Sciences Institute", "Target"};
     }
     else
       location_names = map.ReadLocationsFromCSVFile(locations_filename);
