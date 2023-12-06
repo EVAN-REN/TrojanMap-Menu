@@ -872,6 +872,31 @@ void MapUI::PlotPointsLabel(std::vector<std::string> &location_ids, std::string 
   cv::waitKey(1);
 }
 
+void MapUI::PlotPointswithName(std::vector<std::string> &location_ids)
+{
+  std::string image_path = cv::samples::findFile("src/lib/map.png");
+  cv::Mat img = cv::imread(image_path, cv::IMREAD_COLOR);
+  // cv::resize(img, img, cv::Size(img.cols, img.rows));
+  auto start = GetPlotLocation(map.data[location_ids[0]].lat, map.data[location_ids[0]].lon);
+  cv::circle(img, cv::Point(int(start.first), int(start.second)), DOT_SIZE,
+             cv::Scalar(0, 0, 255), cv::FILLED);
+  for (auto i = 1; i < int(location_ids.size()); i++)
+  {
+    auto start = GetPlotLocation(map.data[location_ids[i - 1]].lat, map.data[location_ids[i - 1]].lon);
+    auto end = GetPlotLocation(map.data[location_ids[i]].lat, map.data[location_ids[i]].lon);
+    cv::circle(img, cv::Point(int(end.first), int(end.second)), DOT_SIZE,
+               cv::Scalar(0, 0, 255), cv::FILLED);
+  }
+  for (auto x : location_ids)
+  {
+    auto result = GetPlotLocation(map.data[x].lat, map.data[x].lon);
+    cv::putText(img, map.data[x].name, cv::Point(result.first, result.second), cv::FONT_HERSHEY_DUPLEX, 1.0, CV_RGB(255, 0, 0), 2);
+  }
+  cv::startWindowThread();
+  cv::imshow("TrojanMap", img);
+  cv::waitKey(1);
+}
+
 /**
  * CreateAnimation: Create the videos of the progress to get the path
  *
@@ -941,8 +966,9 @@ void MapUI::DynamicPrintMenu()
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
   init_pair(3, COLOR_YELLOW, COLOR_BLACK);
   init_pair(4, COLOR_BLUE, COLOR_BLACK);
+  init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
 
-   std::string menu =
+  std::string menu =
       "TrojanMap Menu\n"
       "**************************************************************\n"
       "* Enter the function number (1-11) to start:                  \n"
@@ -960,14 +986,14 @@ void MapUI::DynamicPrintMenu()
       "* Press Enter to exit                                         \n"
       "**************************************************************\n"
       "Please input a number to run corresponding function:\n";
+  int y = 0;
   std::string s = menu;
-  ui.ScrollLongText(menu);
+  PRINT_TITLE(menu);
   char inp[100];
   scanw("%s", inp);
   int number = atoi(inp);
   clear();
   refresh();
-  int y = 0;
   char input[100];
   switch (number)
   {
@@ -977,14 +1003,14 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 1. Autocomplete                                             \n"
         "**************************************************************\n";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     menu = "Please input a partial location:";
-    y = ui.ScrollLongText(menu, 10, y);
+    PRINT_MESSAGE(menu);
     scanw("%[^\n]", input);
     if (input[0] == '\n')
     {
       menu = "Invalid input, please try again.\n";
-      y = ui.ScrollLongText(menu);
+      PRINT_ERROR(menu);
       getchar();
       clear();
       DynamicPrintMenu();
@@ -996,20 +1022,20 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     if (results.size() != 0)
     {
       for (auto x : results)
-        y = ui.ScrollLongText(x, 10, y);
+        PRINT_RESULT(x);
     }
     else
     {
-      ui.ScrollLongText("No matched locations.", 10, y);
+      PRINT_WARNING("No matched locations.");
     }
     menu = "**************************************************************\n";
-    y = ui.ScrollLongText(menu, 10, y);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1021,9 +1047,9 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 2. Find the position                                        \n"
         "**************************************************************\n";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     menu = "Please input a location:";
-    y = ui.ScrollLongText(menu, 10, y);
+    PRINT_MESSAGE(menu);
     scanw("%[^\n]", input);
     auto start = std::chrono::high_resolution_clock::now();
     auto results = map.GetPosition(input);
@@ -1031,31 +1057,31 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     if (results.first != -1)
     {
-      y = ui.ScrollLongText("Latitude: " + std::to_string(results.first), 10, y);
-      y = ui.ScrollLongText("Longitude: " + std::to_string(results.second), 10, y);
+      PRINT_RESULT("Latitude: " + std::to_string(results.first));
+      PRINT_RESULT("Longitude: " + std::to_string(results.second));
       PlotPoint(results.first, results.second);
     }
     else
     {
-      y = ui.ScrollLongText("No matched location.", 10, y);
+      PRINT_ERROR("No matched location.");
       std::string tmp = map.FindClosestName(input);
-      PRINTNEXT("Did you mean " + tmp + " instead of " + input + "? [y/n]");
+      PRINT_WARNING("Did you mean " + tmp + " instead of " + input + "? [y/n]");
       scanw("%[^\n]", input);
       if (input[0] == 'y')
       {
         results = map.GetPosition(tmp);
-        y = ui.ScrollLongText("Latitude: " + std::to_string(results.first), 10, y);
-        y = ui.ScrollLongText("Longitude: " + std::to_string(results.second), 10, y);
+        PRINT_RESULT("Latitude: " + std::to_string(results.first));
+        PRINT_RESULT("Longitude: " + std::to_string(results.second));
         PlotPoint(results.first, results.second);
       }
     }
     menu = "**************************************************************\n";
-    y = ui.ScrollLongText(menu, 10, y);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1067,13 +1093,13 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 3. CalculateShortestPath                                    \n"
         "**************************************************************\n";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     menu = "Please input the start location:";
-    y = ui.ScrollLongText(menu, 10, y);
+    PRINT_MESSAGE(menu);
     char input1[100];
     scanw("%s", input1);
     menu = "Please input the destination:";
-    y = ui.ScrollLongText(menu, 10, y);
+    PRINT_MESSAGE(menu);
     char input2[100];
     scanw("%s", input2);
     auto start = std::chrono::high_resolution_clock::now();
@@ -1082,21 +1108,21 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     if (results.size() != 0)
     {
-      // for (auto x : results) y = ui.ScrollLongText(x, 10, y);
-      y = ui.ScrollLongText("The distance of the path is:" + std::to_string(map.CalculatePathLength(results)) + " miles", 10, y);
+      // for (auto x : results) PRINT_MESSAGE(x);
+      PRINT_RESULT("The distance of the path is:" + std::to_string(map.CalculatePathLength(results)) + " miles");
       PlotPathwithName(results);
     }
     else
     {
-      y = ui.ScrollLongText("No route from the start point to the destination.", 10, y);
+      PRINT_WARNING("No route from the start point to the destination.");
     }
     menu = "**************************************************************\n";
-    y = ui.ScrollLongText(menu, 10, y);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1108,47 +1134,52 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 4. Get all locations in a category                           \n"
         "**************************************************************\n";
-    y = ui.ScrollLongText(menu);
-    auto output = map.GetAllCategories();
-    clear();
-    y = ui.ScrollLongText("Avalible categories:");
+    PRINT_TITLE(menu);
+
     int cnt = 1;
-    for (auto x : output)
-    {
-      if (!x.empty())
-      {
-        std::string cate = std::to_string(cnt) + '.' + x;
-        y = ui.ScrollLongText(cate, 10, y);
-        cnt++;
-      }
-    }
     menu = "Please input category name:";
-    y = ui.ScrollLongText(menu, 10, y);
+    PRINT_MESSAGE(menu);
     scanw("%[^\n]", input);
     clear();
     auto start = std::chrono::high_resolution_clock::now();
-    output = map.GetAllLocationsFromCategory(input);
+    std::vector<std::string> output = map.GetAllLocationsFromCategory(input);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     menu = "*************************Results******************************";
-    y = ui.ScrollLongText(menu);
-    if (output.size() != 0)
+    PRINT_TITLE(menu);
+    if (output[0] != "-1")
     {
       for (auto x : output)
       {
         std::string name = map.GetName(x);
-        y = ui.ScrollLongText(name, 10, y);
+        PRINT_RESULT(name);
       }
-      PlotPathwithName(output);
+      PlotPointswithName(output);
     }
     else
     {
-      y = ui.ScrollLongText("No place founded in that category.", 10, y);
+      std::string tmp = map.FindClosestAttribute(input);
+      PRINT_ERROR("No matched attribute, did you mean " + tmp + " instead of " + input + "? [y/n]");
+      scanw("%[^\n]", input);
+      if (input[0] == 'y')
+      {
+        output = map.GetAllLocationsFromCategory(tmp);
+        for (auto x : output)
+        {
+          std::string name = map.GetName(x);
+          PRINT_RESULT(name);
+        }
+        PlotPointswithName(output);
+      }
+      else
+      {
+        PRINT_WARNING("No place founded in that category.");
+      }
     }
     menu = "**************************************************************\n";
-    y = ui.ScrollLongText(menu, 10, y);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1160,9 +1191,9 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 5. Get location matching regular expression                 \n"
         "**************************************************************\n";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     menu = "Please input the regular expression:";
-    y = ui.ScrollLongText(menu, 10, y);
+    PRINT_MESSAGE(menu);
     char input1[100];
     std::vector<std::string> output;
     scanw("%s", input1);
@@ -1175,27 +1206,27 @@ void MapUI::DynamicPrintMenu()
     catch (const std::regex_error &e)
     {
       // error
-      PRINTNEXT("Error: input is not a valid regular expression!");
+      PRINT_ERROR("Error: input is not a valid regular expression!");
     }
     clear();
     menu = "*************************Results******************************";
-    PRINTFIRST(menu);
+    PRINT_TITLE(menu);
     if (output.size() != 0)
     {
       for (auto x : output)
       {
         std::string name = map.GetName(x);
-        y = ui.ScrollLongText(name, 10, y);
+        PRINT_RESULT(name);
       }
-      PlotPathwithName(output);
+      PlotPointswithName(output);
     }
     else
     {
-      y = ui.ScrollLongText("No match for the expression provided.", 10, y);
+      PRINT_WARNING("No match for the expression provided.");
     }
     menu = "**************************************************************\n";
-    y = ui.ScrollLongText(menu, 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1207,21 +1238,21 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 6. Cycle Detection                                          \n"
         "**************************************************************\n";
-    y = ui.ScrollLongText(menu);
-    y = ui.ScrollLongText("Please input the left bound longitude(between -118.320 and -118.250):", 10, y);
+    PRINT_TITLE(menu);
+    PRINT_MESSAGE("Please input the left bound longitude(between -118.320 and -118.250):");
     scanw("%[^\n]", input);
     std::vector<double> square;
     square.push_back(atof(input));
 
-    y = ui.ScrollLongText("Please input the right bound longitude(between -118.320 and -118.250):", 10, y);
+    PRINT_MESSAGE("Please input the right bound longitude(between -118.320 and -118.250):");
     scanw("%[^\n]", input);
     square.push_back(atof(input));
 
-    y = ui.ScrollLongText("Please input the upper bound latitude(between 34.000 and 34.040):", 10, y);
+    PRINT_MESSAGE("Please input the upper bound latitude(between 34.000 and 34.040):");
     scanw("%[^\n]", input);
     square.push_back(atof(input));
 
-    y = ui.ScrollLongText("Please input the lower bound latitude(between 34.000 and 34.040):", 10, y);
+    PRINT_MESSAGE("Please input the lower bound latitude(between 34.000 and 34.040):");
     scanw("%[^\n]", input);
     square.push_back(atof(input));
     auto subgraph = map.GetSubgraph(square);
@@ -1233,16 +1264,16 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************\n";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     if (results == true)
-      y = ui.ScrollLongText("there exists a cycle in the subgraph ", 10, y);
+      PRINT_RESULT("there exists a cycle in the subgraph ")
     else
-      y = ui.ScrollLongText("there exist no cycle in the subgraph ", 10, y);
+      PRINT_WARNING("there exist no cycle in the subgraph ");
 
     menu = "**************************************************************\n";
-    y = ui.ScrollLongText(menu, 10, y);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1254,13 +1285,13 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 7. Topological Sort                                         \n"
         "**************************************************************\n";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     menu = "Read locations from input folder? [y/n]";
-    PRINTNEXT(menu);
-    scanw("%[^\n]",input);
+    PRINT_MESSAGE(menu);
+    scanw("%[^\n]", input);
     std::vector<std::string> location_names;
     std::vector<std::vector<std::string>> dependencies;
-    if(input[0] == 'y')
+    if (input[0] == 'y')
     {
       location_names = map.ReadLocationsFromCSVFile("input/topologicalsort_locations.csv");
       dependencies = map.ReadDependenciesFromCSVFile("input/topologicalsort_dependencies.csv");
@@ -1268,29 +1299,28 @@ void MapUI::DynamicPrintMenu()
     else
     {
       menu = "Please input the locations filename:";
-      y = ui.ScrollLongText(menu, 10, y);
+      PRINT_MESSAGE(menu);
       char locations_filename[100] = "None";
       scanw("%[^\n]", locations_filename);
-      PRINTNEXT(locations_filename);
-      if (locations_filename[0]=='N')
+      PRINT_MESSAGE(locations_filename);
+      if (locations_filename[0] == 'N')
       {
-        PRINTNEXT("Default input: Ralphs, KFC, Chick-fil-A");
+        PRINT_WARNING("Default input: Ralphs, KFC, Chick-fil-A");
         location_names = {"Ralphs", "KFC", "Chick-fil-A"};
       }
       else
         location_names = map.ReadLocationsFromCSVFile(locations_filename);
       menu = "Please input the dependencies filename:";
-      y = ui.ScrollLongText(menu, 10, y);
+      PRINT_MESSAGE(menu);
       char dependencies_filename[100] = "None";
       scanw("%s", dependencies_filename);
       if (dependencies_filename[0] == 'N')
       {
-        PRINTNEXT("Default input: {\"Ralphs\", \"Chick-fil-A\"}, {\"Ralphs\", \"KFC\"}, {\"Chick-fil-A\", \"KFC\"}");
+        PRINT_WARNING("Default input: {\"Ralphs\", \"Chick-fil-A\"}, {\"Ralphs\", \"KFC\"}, {\"Chick-fil-A\", \"KFC\"}");
         dependencies = {{"Ralphs", "Chick-fil-A"}, {"Ralphs", "KFC"}, {"Chick-fil-A", "KFC"}};
       }
       else
         dependencies = map.ReadDependenciesFromCSVFile(dependencies_filename);
-
     }
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -1299,12 +1329,12 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************\n";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     if (result.size() > 0)
     {
-      y = ui.ScrollLongText("Topological Sorting Results:", 10, y);
+      PRINT_MESSAGE("Topological Sorting Results:");
       for (auto x : result)
-        y = ui.ScrollLongText(x, 10, y);
+        PRINT_RESULT(x);
       std::vector<std::string> node_ids;
       for (auto x : result)
         node_ids.push_back(map.GetID(x));
@@ -1312,12 +1342,12 @@ void MapUI::DynamicPrintMenu()
     }
     else
     {
-      y = ui.ScrollLongText("There is no topological sort for the given graph.\n", 10, y);
+      PRINT_WARNING("There is no topological sort for the given graph.\n");
     }
     menu = "**************************************************************\n";
-    y = ui.ScrollLongText(menu, 10, y);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1329,11 +1359,11 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 8. Traveling salesman problem                               \n"
         "**************************************************************\n";
-    y = ui.ScrollLongText(menu);
+    PRINT_TITLE(menu);
     menu = "In this task, we will select N random points on the map and you need to find the path to travel these points and back to the start point.";
-    PRINTNEXT(menu);
+    PRINT_MESSAGE(menu);
     menu = "Please input the number of the places:";
-    PRINTNEXT(menu);
+    PRINT_MESSAGE(menu);
     scanw("%[^\n]", input);
     int num = std::stoi(input);
     std::vector<std::string> keys;
@@ -1347,8 +1377,8 @@ void MapUI::DynamicPrintMenu()
       locations.push_back(keys[rand() % keys.size()]);
     PlotPoints(locations);
     for (auto x : locations)
-      PRINTNEXT(x);
-    PRINTNEXT("Calculating ...");
+      PRINT_RESULT(x);
+    PRINT_MESSAGE("Calculating result using locations generated above ...");
     auto start = std::chrono::high_resolution_clock::now();
     auto results = map.TravelingTrojan_Brute_force(locations);
     auto stop = std::chrono::high_resolution_clock::now();
@@ -1356,27 +1386,27 @@ void MapUI::DynamicPrintMenu()
     CreateAnimation(results.second, "output0.avi");
     clear();
     menu = "*************************Results******************************\n";
-    PRINTFIRST(menu);
+    PRINT_TITLE(menu);
     menu = "TravelingTrojan_Brute_force\n";
-    PRINTNEXT(menu);
+    PRINT_MESSAGE(menu);
     if (results.second.size() != 0)
     {
       for (auto x : results.second[results.second.size() - 1])
-        PRINTNEXT(x);
-      PRINTNEXT("\nThe distance of the path is:" + std::to_string(results.first) + " miles");
+        PRINT_RESULT(x);
+      PRINT_RESULT("\nThe distance of the path is:" + std::to_string(results.first) + " miles");
       PlotPointsOrder(results.second[results.second.size() - 1]);
     }
     else
     {
-      PRINTNEXT("The size of the path is 0");
+      PRINT_WARNING("The size of the path is 0");
     }
     menu = "**************************************************************\n"
            "You could find your animation at src/lib/output0.avi.          \n";
-    PRINTNEXT(menu);
+    PRINT_MESSAGE(menu);
     menu = "**************************************************************\n";
-    PRINTNEXT(menu);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1388,24 +1418,24 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 9. Find Nearby                                              \n"
         "**************************************************************\n";
-    PRINTFIRST(menu);
+    PRINT_TITLE(menu);
     menu = "Please input the attribute:";
-    PRINTNEXT(menu);
+    PRINT_MESSAGE(menu);
     char attribute[100];
     scanw("%[^\n]", attribute);
 
     menu = "Please input the locations:";
-    PRINTNEXT(menu);
+    PRINT_MESSAGE(menu);
     char origin[100];
     scanw("%[^\n]", origin);
 
     menu = "Please input radius r:";
-    PRINTNEXT(menu);
+    PRINT_MESSAGE(menu);
     scanw("%[^\n]", input);
     int r = std::stoi(input);
 
     menu = "Please input number k:(number of maximum locations)";
-    PRINTNEXT(menu);
+    PRINT_MESSAGE(menu);
     scanw("%[^\n]", input);
     int k = std::stoi(input);
 
@@ -1415,22 +1445,23 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************";
-    PRINTFIRST(menu);
-    PRINTNEXT("Find Nearby Results:");
+    PRINT_TITLE(menu);
+    PRINT_MESSAGE("Find Nearby Results:");
     int cnt = 1;
     for (auto x : result)
     {
-      PRINTNEXT(std::to_string(cnt) + " " + map.data[x].name);
+      PRINT_RESULT(std::to_string(cnt) + " " + map.data[x].name);
       cnt++;
     }
-    PlotPointsLabel(result, map.GetID(origin));
-    std::vector<std::string> originLocation;;
+    PlotPointswithName(result);
+    std::vector<std::string> originLocation;
+    ;
     originLocation.push_back(map.GetID(origin));
 
     menu = "**************************************************************\n";
-    PRINTNEXT(menu);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1442,15 +1473,18 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 10. Find Path to Visit All Places                           \n"
         "**************************************************************\n";
-    PRINTFIRST(menu);
-    PRINTNEXT("Please input the locations filename:");
+    PRINT_TITLE(menu);
+    PRINT_MESSAGE("Please input the locations filename:");
     char locations_filename[100] = "None";
     scanw("%[^\n]", locations_filename);
 
-    // Read location names from CSV file        
+    // Read location names from CSV file
     std::vector<std::string> location_names;
     if (locations_filename[0] == 'N')
-      location_names = {"Ralphs", "KFC", "Chick-fil-A", "Target", "Lee's Market", "Dornsife Spatial Sciences Institute"};
+    {
+      PRINT_WARNING("Using default input: \"Ralphs\", \"KFC\", \"Dornsife Spatial Sciences Institute\"");
+      location_names = {"Ralphs", "KFC", "Dornsife Spatial Sciences Institute", "Smoke Shop", "Target"};
+    }
     else
       location_names = map.ReadLocationsFromCSVFile(locations_filename);
 
@@ -1460,22 +1494,23 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************\n";
-    PRINTFIRST(menu);
+    PRINT_TITLE(menu);
     if (results.size() != 0)
     {
       for (auto x : results)
-        PRINTNEXT(x);
-      PRINTNEXT("The distance of the path is: " + std::to_string(map.CalculatePathLength(results)) + " miles");
+        if (!map.GetName(x).empty())
+          PRINT_RESULT(map.GetName(x));
+      PRINT_RESULT("The distance of the path is: " + std::to_string(map.CalculatePathLength(results)) + " miles");
       PlotPathwithName(results);
     }
     else
     {
-      PRINTNEXT("No route from the start point to the destination.");
+      PRINT_WARNING("No route from the start point to the destination.");
     }
     menu = "**************************************************************\n";
-    PRINTNEXT(menu);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();
@@ -1487,26 +1522,26 @@ void MapUI::DynamicPrintMenu()
         "**************************************************************\n"
         "* 11. Check Exist of Path with Constrain                      \n"
         "**************************************************************\n";
-    PRINTFIRST(menu);
+    PRINT_TITLE(menu);
     std::vector<std::pair<double, std::vector<std::string>>> Q;
     while (true)
     {
       menu = "Please input the start location:";
-      PRINTNEXT(menu);
+      PRINT_MESSAGE(menu);
       char input1[100];
       scanw("%[^\n]", input1);
       menu = "Please input the destination:";
-      PRINTNEXT(menu);
+      PRINT_MESSAGE(menu);
       char input2[100];
       scanw("%[^\n]", input2);
       menu = "Please input the volumn of the gas tank:";
-      PRINTNEXT(menu);
+      PRINT_MESSAGE(menu);
       char input3[100];
       scanw("%[^\n]", input3);
       double volumn = std::stod(input3);
       Q.push_back({volumn, {input1, input2}});
       menu = "More Query? (y/n)";
-      PRINTNEXT(menu);
+      PRINT_MESSAGE(menu);
       char input4[100];
       scanw("%[^\n]", input4);
       if (input4[0] != 'y')
@@ -1518,16 +1553,16 @@ void MapUI::DynamicPrintMenu()
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     clear();
     menu = "*************************Results******************************\n";
-    PRINTFIRST(menu);
+    PRINT_TITLE(menu);
     if (results.size() != 0)
     {
       for (int i = 0; i < Q.size(); i++)
-        PRINTNEXT("From " + Q[i].second[0] + " to " + Q[i].second[1] + " with " + std::to_string(Q[i].first) + " gallons of gas tank: " + (results[i] ? "Yes" : "No"));
+        PRINT_RESULT("From " + Q[i].second[0] + " to " + Q[i].second[1] + " with " + std::to_string(Q[i].first) + " gallons of gas tank: " + (results[i] ? "Yes" : "No"));
     }
     menu = "**************************************************************\n";
-    PRINTNEXT(menu);
-    y = ui.ScrollLongText("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms", 10, y);
-    y = ui.ScrollLongText("Press any keys to continue.", 10, y);
+    PRINT_MESSAGE(menu);
+    PRINT_MESSAGE("Time taken by function: " + std::to_string(duration.count() / 1000) + " ms");
+    PRINT_MESSAGE("Press any keys to continue.");
     getchar();
     clear();
     DynamicPrintMenu();

@@ -11,8 +11,11 @@
 #include <ncurses.h>
 #include "src/lib/ui.h"
 
-#define PRINTFIRST(x) y=ui.ScrollLongText(x);
-#define PRINTNEXT(x) y=ui.ScrollLongText(x,10,y);
+#define PRINT_TITLE(x) y=ui.ScrollLongMenuText(x);
+#define PRINT_MESSAGE(x) y=ui.ScrollLongMessageText(x,10,y);
+#define PRINT_RESULT(x) y=ui.ScrollLongResultText(x,10,y);
+#define PRINT_WARNING(x) y=ui.ScrollLongWarningText(x,10,y);
+#define PRINT_ERROR(x) y=ui.ScrollLongErrorText(x,10,y);
 #endif
 
 #include <iostream>
@@ -60,6 +63,9 @@ class MapUI {
 
   // Given a vector of location ids and origin, draws the points with their label.
   void PlotPointsLabel(std::vector<std::string> &location_ids, std::string origin);
+
+  // Given a vector of location ids and origin, draws the points with their label.
+  void PlotPointswithName(std::vector<std::string> &location_ids);
 
   // Create the videos of the progress to get the path
   void CreateAnimation(std::vector<std::vector<std::string>>, std::string);

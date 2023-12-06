@@ -259,7 +259,7 @@ std::vector<std::string> TrojanMap::GetAllLocationsFromCategory(
   {
     for (const std::string &att : node.second.attributes)
     {
-      if (att == category)
+      if (caseInsensitiveStringCompare(att,category))
       {
         res.push_back(node.second.id);
         break;
@@ -1147,6 +1147,24 @@ std::vector<bool> TrojanMap::Queries(const std::vector<std::pair<double, std::ve
     } 
   }
   return ans;
+}
+
+std::string TrojanMap::FindClosestAttribute(std::string name)
+{
+  std::string tmp = ""; // Start with a dummy word
+  int minDis = __INT_MAX__;
+  auto Categories = GetAllCategories();
+  for (auto it = Categories.begin(); it != Categories.end(); it++)
+  {
+
+    int currentDis = CalculateEditDistance(name, *it);
+    if (currentDis < minDis)
+    {
+      minDis = currentDis;
+      tmp = *it;
+    }
+  }
+  return tmp;
 }
 
 /**

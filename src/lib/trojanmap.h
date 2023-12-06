@@ -164,6 +164,9 @@ class TrojanMap {
   std::vector<bool> Queries(const std::vector<std::pair<double, std::vector<std::string>>> &q);
 
   //----------------------------------------------------- User-defined functions
+
+  // Find the closest attribute
+  std::string FindClosestAttribute(std::string name);
 };
 
 #endif
