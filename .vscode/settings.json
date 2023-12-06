@@ -97,7 +97,17 @@
     "variant": "cpp",
     "climits": "cpp",
     "cfenv": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "any": "cpp",
+    "charconv": "cpp",
+    "csetjmp": "cpp",
+    "csignal": "cpp",
+    "cuchar": "cpp",
+    "netfwd": "cpp",
+    "rope": "cpp",
+    "slist": "cpp",
+    "scoped_allocator": "cpp",
+    "valarray": "cpp"
   },
   "lldb.displayFormat": "auto",
   "lldb.dereferencePointers": true,
