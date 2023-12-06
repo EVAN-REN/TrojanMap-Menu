@@ -58,3 +58,63 @@ TSP:
 |  8              |                     |                      |                           |
 |  9              |                     |                      |                           |
 |  10             |                     |                      |                           |
+
+
+
+1.
+ta
+chi
+Expo
+
+2.
+chipote
+Venicehill
+leavylibrary
+
+3.
+Chase - Ralphs
+Ralphs - Target
+Popeyes - KFC
+
+4.
+fast_food
+bank
+place_of_worship
+
+5
+.*Library.*
+Chinese.*
+\w{6}
+
+6
+-118.290, -118.289, 34.030, 34.020
+
+7
+restaurant
+Target
+10
+10
+
+school
+KFC
+10
+10
+
+fast_food
+Shell
+1
+10
+
+8
+Target
+Ralphs
+0.05
+Ralphs
+Target
+0.01
+KFC
+Target
+0.02
+dummy
+dummy
+999
