@@ -1,94 +1,4 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/Nd2a5ym_)
-# EE538 Final Project - Fall 2023 - TrojanMap
-
-The project is **optional**: you can select one of the following options:
-
-1. Work on the project and submit the reports.
-2. Submit homework assignments (HW4, 5, 6).
-
-If you choose to work on the project, you don't have to submit the remaining homework assignments. Similarly, if you choose to work on the homework assignment, you do not have to submit the project. 
-
-You should inform us of your choice by the first due date (Wednesday, November 15).
-
-#### Who should work on the project?
-If you plan to become a software engineer, we recommend working on the project as it will give you more experience coding a real-life project. Otherwise, you can take the homework assignments.
-
-Not everything in the project is covered in the class. The idea is for you to do some quick research and figure them out. For example, you should read about handling regular expressions in C++.
-
-#### Which one is harder?
-We expect both options to take a similar amount of time. The project, however, might require extra effort from you during the environment setup and installation prerequisites.
-
-#### How many students in each team?
-Each team should consist of one or two students. You can find a teammate who is in other sections of the course. You should select your teammates by the first due date (November 15).
-
-#### What should I submit?
-The project is submitted in different phases. You are required to submit the following:
-
-1. Phase 1, 2, and 3: these should be submitted on GitHub.
-2. Video presentation: you and your teammate will create a 3-4 minute video, post it as an unlisted video on Youtube and submit the link. The video should include:
-   - Teammates introduction
-   - Demo of the executable
-   - Quick overview of the algorithm and code architecture
-   - Tables, plots and comparisons
-   - No coding details in the video
-
-   Here is a [sample video from a previous semester.](https://www.youtube.com/watch?v=_KDML4Ck3SU&t=4s) 
-
-3. A final report in the README file of your GitHub submission. The final report should include the questions that are asked in this README file, your tables and plots for the runtime results, and any other detail of your code.
-
-## Due Dates
-
-- Phase 1: Wednesday, November 15, 23:59
-- Phase 2: Tuesday, November 21, 23:59
-- Phase 3: Wednesday, December 6, 23:59
-- Video Presentation: Wednesday, December 6, 23:59
-- Report: Wednesday, December 6, 23:59
-
-## TrojanMap
-
-This project focuses on using data structures in C++ and implementing various graph algorithms to build a map application.
-
-<p align="center"><img src="img/TrojanMap.png" alt="Trojan" width="500" /></p>
-
-- Please clone the repository, read through [README.md](README.md), and implement the functions of the project.
-- Please make sure that your code can run `bazel run` and `bazel test`.
-- You need to fill in [trojanmap.cc](src/lib/trojanmap.cc), [mapui.cc](src/lib/mapui.cc) and maybe [mapui.h](src/lib/mapui.h), and add unit tests in the `tests` directory.
-- We will use the autograder to grade some of the questions
-- We will compare the code similarity between submissions and the previous semester's submissions. Please complete the project within your group.
----
-
-## The Data Structure
-
-Each point on the map is represented by the class **Node** shown below and defined in [trojanmap.h](src/lib/trojanmap.h).
-
-```cpp
-// A Node is the location of one point in the map.
-class Node {
- public:
-  Node(){};
-  Node(const Node &n) {
-    id = n.id;
-    lat = n.lat;
-    lon = n.lon;
-    name = n.name;
-    neighbors = n.neighbors;
-    attributes = n.attributes;
-  };
-  std::string id;    // A unique id assigned to each point.
-  double lat;        // Latitude
-  double lon;        // Longitude
-  std::string name;  // Name of the location. E.g. "Bank of America".
-  std::vector<std::string>
-      neighbors;  // List of the ids of all neighbor points.
-  std::unordered_set<std::string>
-      attributes;  // List of the attributes of the location.
-};
-```
-
----
-
-## Prerequisites
-The details of the environment setup will be reviewed in the discussion session. Please do not miss that class!
+The presentation is avalible at [!https://www.youtube.com/watch?v=mKMLpjKca1I]
 
 ### External Libraries Installation
 
@@ -116,8 +26,6 @@ $ brew info ncurses
 ```
 
 respectively, and update their paths in the `WORKSPACE` file of your project root directory with the actual installation paths.
-
-
 
 #### For Ubuntu users
 Step 1. Type the following lines in your terminal.
